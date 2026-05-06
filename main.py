@@ -1,28 +1,28 @@
 from flask import Flask, render_template, request
-from requerimientoAD import clsRequerimiento, insertar_requerimiento
+from maquinariaAD import clsMaquinaria, insertar_maquinaria
 
 app = Flask(__name__)
 
-@app.route("/")
-def inicio():
-    # Renderiza el wireframe del formulario
-    return render_template("form_requerimiento.html")
+@app.route("/registro_maquinaria")
+def registro_maquinaria():
+    # Renderiza la vista que armamos con tu diseño
+    return render_template("form_maquinaria.html")
 
-@app.route("/guardar_requerimiento", methods=["POST"])
-def guardar_requerimiento():
+@app.route("/guardar_maquinaria", methods=["POST"])
+def guardar_maquinaria():
     try:
-        # Se captura la data del formulario
-        objRequerimiento = clsRequerimiento(
-            request.form["titulo"], 
-            request.form["area"], 
-            request.form["fecha_limite"], 
-            request.form["descripcion"]
+        objMaquinaria = clsMaquinaria(
+            request.form["nombre_codigo"],
+            request.form["tipo"],
+            request.form["marca"],
+            request.form["modelo"],
+            request.form["area"],
+            request.form["estado"],
+            request.form["observaciones"]
         )
-        
-        # Se intenta insertar en la BD
-        if insertar_requerimiento(objRequerimiento):
-            return "Requerimiento publicado correctamente en el portal de Pomalca."
-        return "Error al registrar el requerimiento."
+        if insertar_maquinaria(objMaquinaria):
+            return "Maquinaria registrada correctamente en el sistema Pomalca."
+        return "Error al registrar la maquinaria."
     except Exception as e:
         return "Excepción capturada: " + repr(e)
 
