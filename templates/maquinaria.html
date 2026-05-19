@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomalca - Lista de Maquinarias</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* TOPBAR */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: #ffffff;
+            border-bottom: 2px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+        }
+
+        .topbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #5b7fb1;
+            border: 2px solid #5b7fb1;
+            padding: 5px 15px;
+            border-radius: 4px;
+        }
+
+        .topbar .title {
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #333;
+        }
+
+        .topbar .user-info {
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .topbar .user-info a {
+            color: #e74c3c;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 250px;
+            background-color: #ffffff;
+            border-right: 2px solid #ccc;
+            margin-top: 60px;
+            padding-top: 20px;
+            height: calc(100vh - 60px);
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            padding: 15px 20px;
+            cursor: pointer;
+            color: #555;
+            font-weight: 600;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar li:hover,
+        .sidebar li.active {
+            background-color: #f0f0f0;
+            border-left: 4px solid #5b7fb1;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .table-container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .header-table {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header-table h2 {
+            margin: 0;
+            color: #333;
+        }
+
+        .btn-add {
+            background-color: #5b7fb1;
+            color: white;
+            padding: 10px 18px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .btn-add:hover {
+            background-color: #466792;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #f1f1f1;
+            color: #333;
+            text-align: left;
+            padding: 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+            color: #555;
+        }
+
+        tr:hover {
+            background-color: #fafafa;
+        }
+
+        /* ESTADOS */
+        .estado {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .operativo {
+            background-color: #28a745;
+        }
+
+        .mantenimiento {
+            background-color: #f39c12;
+        }
+
+        .fuera {
+            background-color: #dc3545;
+        }
+
+        /* BOTONES */
+        .acciones {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-edit {
+            background-color: #5b7fb1;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .btn-delete {
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .btn-edit:hover {
+            background-color: #466792;
+        }
+
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+
+        .empty-msg {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="logo">Pomalca</div>
+
+        <div class="title">
+            SISTEMA DE GESTIÓN DE MAQUINARIAS
+        </div>
+
+        <div class="user-info">
+            Admin (laboratorio)<br>
+            <a href="#">Cerrar Sesión</a>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <ul>
+            <li>Dashboard</li>
+            <li class="active">Maquinarias</li>
+            <li>Reportes</li>
+            <li>Configuración</li>
+        </ul>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <div class="table-container">
+
+            <div class="header-table">
+                <h2>Listado de Maquinarias</h2>
+
+                <a href="{{ url_for('registro_maquinaria') }}" class="btn-add">
+                    + Nueva Maquinaria
+                </a>
+            </div>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre/Código</th>
+                        <th>Tipo</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Área</th>
+                        <th>Estado</th>
+                        <th>Observaciones</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% if datos %}
+
+                        {% for maquinaria in datos %}
+
+                        <tr>
+
+                            <td>{{ maquinaria['id'] }}</td>
+                            <td>{{ maquinaria['nombre_codigo'] }}</td>
+                            <td>{{ maquinaria['tipo'] }}</td>
+                            <td>{{ maquinaria['marca'] }}</td>
+                            <td>{{ maquinaria['modelo'] }}</td>
+                            <td>{{ maquinaria['area'] }}</td>
+
+                            <td>
+
+                                {% if maquinaria['estado'] == 'Operativo' %}
+
+                                    <span class="estado operativo">
+                                        {{ maquinaria['estado'] }}
+                                    </span>
+
+                                {% elif maquinaria['estado'] == 'En Mantenimiento' %}
+
+                                    <span class="estado mantenimiento">
+                                        {{ maquinaria['estado'] }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="estado fuera">
+                                        {{ maquinaria['estado'] }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>{{ maquinaria['observaciones'] }}</td>
+
+                            <td>
+
+                                <div class="acciones">
+
+                                    <a href="{{ url_for('cargar_editar_maquinaria', idMaquinaria=maquinaria['id']) }}"
+                                       class="btn-edit">
+
+                                        Editar
+                                    </a>
+
+                                    <a href="{{ url_for('eliminar_maquinaria', idMaquinaria=maquinaria['id']) }}"
+                                       class="btn-delete"
+                                       onclick="return confirm('¿Deseas eliminar esta maquinaria?')">
+
+                                        Eliminar
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <tr>
+                            <td colspan="9" class="empty-msg">
+                                No existen maquinarias registradas
+                            </td>
+                        </tr>
+
+                    {% endif %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
