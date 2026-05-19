@@ -21,7 +21,8 @@ def guardar_maquinaria():
             request.form["observaciones"]
         )
         if insertar_maquinaria(objMaquinaria):
-            return "Maquinaria registrada correctamente en el sistema Pomalca."
+             return render_template("maquinaria.html")
+            
         return "Error al registrar la maquinaria."
     except Exception as e:
         return "Excepción capturada: " + repr(e)
