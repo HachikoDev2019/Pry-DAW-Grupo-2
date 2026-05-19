@@ -1,0 +1,51 @@
+# Entorno virtual
+venv/
+env/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Variables de entorno
+.env
+
+# Flask
+instance/
+.webassets-cache
+
+# Base de datos local
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# pytest
+.pytest_cache/
+
+# coverage
+htmlcov/
+.coverage
+
+# mypy
+.mypy_cache/
+
+# Archivos compilados
+build/
+dist/
