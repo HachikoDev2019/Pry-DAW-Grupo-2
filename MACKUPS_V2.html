@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomalca - Portal de Requerimientos y Licitaciones</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        .topbar .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #5b7fb1;
+            border: 2px solid #5b7fb1;
+            padding: 4px 14px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        .topbar .sys-title {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #444;
+            text-transform: uppercase;
+        }
+
+        .topbar .user-info {
+            font-size: 13px;
+            color: #555;
+            text-align: right;
+        }
+
+        .topbar .user-info a {
+            display: block;
+            color: #e74c3c;
+            font-size: 11px;
+            text-decoration: none;
+            margin-top: 2px;
+        }
+
+        .topbar .user-info a:hover { text-decoration: underline; }
+
+        /* ── LAYOUT ── */
+        .layout {
+            display: flex;
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 220px;
+            background: #ffffff;
+            border-right: 2px solid #ddd;
+            padding-top: 12px;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar ul { list-style: none; }
+
+        .sidebar li {
+            padding: 13px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            border-left: 4px solid transparent;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .sidebar li:hover { background: #f5f7fa; }
+
+        .sidebar li.active {
+            background: #eef3fb;
+            border-left-color: #5b7fb1;
+            color: #5b7fb1;
+        }
+
+        /* ── MAIN CONTENT ── */
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px 32px;
+        }
+
+        /* ── PORTAL HEADER ── */
+        .portal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .portal-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 4px;
+        }
+
+        .portal-header p {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* ── TABS ── */
+        .tabs {
+            display: flex;
+            border: 1.5px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            width: fit-content;
+            margin: 0 auto 22px;
+        }
+
+        .tabs button {
+            padding: 9px 24px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            background: #fff;
+            color: #555;
+            cursor: pointer;
+            border-right: 1px solid #ccc;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .tabs button:last-child { border-right: none; }
+
+        .tabs button:hover { background: #f0f0f0; }
+
+        .tabs button.active {
+            background: #222;
+            color: #fff;
+        }
+
+        /* ── STAT CARDS ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .number {
+            font-size: 34px;
+            font-weight: 700;
+            color: #222;
+            line-height: 1;
+        }
+
+        .stat-card .sub {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        /* ── SECTION TITLE ── */
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #444;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        /* ── TABLE ── */
+        .table-wrap {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            background: #fff;
+        }
+
+        table thead th {
+            background: #f7f8fa;
+            font-size: 10px;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        table tbody td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+            vertical-align: middle;
+        }
+
+        table tbody tr:last-child td { border-bottom: none; }
+
+        table tbody tr:hover { background: #fafbff; }
+
+        /* ── BADGES ── */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge-licit   { background: #d1e8ff; color: #1565c0; }
+        .badge-rev     { background: #fff3cd; color: #856404; }
+        .badge-pend    { background: #f0f0f0; color: #555; border: 1px solid #ccc; }
+        .badge-aprov   { background: #d4edda; color: #155724; }
+        .badge-rech    { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .prio-alta  { color: #c0392b; font-weight: 700; font-size: 12px; }
+        .prio-media { color: #e67e22; font-weight: 700; font-size: 12px; }
+        .prio-baja  { color: #27ae60; font-weight: 700; font-size: 12px; }
+
+        .link {
+            color: #5b7fb1;
+            font-size: 11px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .link:hover { color: #3d5a82; }
+
+        /* ── DETAIL BOX ── */
+        .detail-box {
+            background: #fff;
+            border: 2px solid #222;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .detail-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .detail-box-header h3 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        /* ── PROCESS FLOW ── */
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            background: #f0f0f0;
+            color: #777;
+            border: 1px solid #ddd;
+            white-space: nowrap;
+        }
+
+        .flow-step.done    { background: #222; color: #fff; border-color: #222; }
+        .flow-step.current { background: #888; color: #fff; border-color: #888; }
+        .flow-arrow { color: #bbb; font-size: 12px; flex-shrink: 0; }
+
+        /* ── DETAIL BODY ── */
+        .detail-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        .detail-field {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            gap: 8px;
+        }
+
+        .detail-field label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #aaa;
+            text-transform: uppercase;
+            width: 120px;
+            flex-shrink: 0;
+            padding-top: 5px;
+        }
+
+        .detail-field .field-val {
+            background: #f7f7f7;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #333;
+            flex: 1;
+        }
+
+        .detail-field .field-val.alta {
+            background: transparent;
+            border: none;
+            color: #c0392b;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        /* ── OFFERS SECTION ── */
+        .offers-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            color: #555;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .offers-meta {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 4px;
+            height: 7px;
+            margin-bottom: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: #5b7fb1;
+            height: 7px;
+            width: 67%;
+            border-radius: 4px;
+        }
+
+        .progress-label {
+            font-size: 10px;
+            color: #999;
+            margin-bottom: 14px;
+        }
+
+        .doc-list { margin-top: 4px; }
+
+        .doc-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #5b7fb1;
+            padding: 5px 0;
+            cursor: pointer;
+        }
+
+        .doc-item::before {
+            content: '■';
+            font-size: 9px;
+            color: #444;
+        }
+
+        .doc-item:hover { text-decoration: underline; }
+
+        /* ── OFFERS TABLE ── */
+        .offers-table-wrap {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .offers-table thead th {
+            font-size: 10px;
+            padding: 9px 12px;
+        }
+
+        .offers-table tbody td {
+            font-size: 11px;
+            padding: 9px 12px;
+        }
+
+        .row-selected td {
+            background: #222 !important;
+            color: #fff !important;
+        }
+
+        .stars { color: #f0ad4e; letter-spacing: -1px; }
+        .stars-dark { color: #ffc966; letter-spacing: -1px; }
+
+        .btn-sel {
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 10px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-eval {
+            background: transparent;
+            color: #666;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            padding: 3px 10px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .btn-eval:hover { background: #f0f0f0; }
+
+        /* ── FOOTER LEGEND ── */
+        .legend {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            margin-top: 20px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .legend span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            display: inline-block;
+        }
+
+        .dot-campo   { background: #5b7fb1; }
+        .dot-planta  { background: #222; }
+        .dot-log     { background: #888; }
+    </style>
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="logo">Pomalca</div>
+        <div class="sys-title">Sistema de Gestión de Requerimientos Internos</div>
+        <div class="user-info">
+            Admin (logística)
+            <a href="#">Cerrar Sesión</a>
+        </div>
+    </div>
+
+    <!-- LAYOUT -->
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <nav class="sidebar">
+            <ul>
+                <li>Dashboard</li>
+                <li class="active">Mis Requerimientos</li>
+                <li>Catálogo de Artículos</li>
+                <li>Reportes</li>
+                <li>Configuración</li>
+            </ul>
+        </nav>
+
+        <!-- MAIN -->
+        <main class="main">
+
+            <!-- Header -->
+            <div class="portal-header">
+                <h1>Portal de Requerimientos y Licitaciones</h1>
+                <p>Gestión de solicitudes internas y proceso de cotización con proveedores</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="active">Requerimientos</button>
+                <button>Licitaciones</button>
+                <button>Proveedores</button>
+                <button>Aprobaciones</button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">Requerimientos Abiertos</div>
+                    <div class="number">12</div>
+                    <div class="sub">3 alta prioridad</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">En Licitación</div>
+                    <div class="number">5</div>
+                    <div class="sub">21 ofertas recibidas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Pendiente Aprobación</div>
+                    <div class="number">4</div>
+                    <div class="sub">esperando firma digital</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Cerrados Este Mes</div>
+                    <div class="number">28</div>
+                    <div class="sub">ahorro estimado 8%</div>
+                </div>
+            </div>
+
+            <!-- Requirements Table -->
+            <p class="section-title">Lista de Requerimientos</p>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th>Área</th>
+                            <th>Prioridad</th>
+                            <th>Solicitante</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>REQ-0041</strong></td>
+                            <td>Repuestos molino principal #1</td>
+                            <td>Fábrica</td>
+                            <td><span class="prio-alta">Alta</span></td>
+                            <td>J. Pérez</td>
+                            <td>05/05/26</td>
+                            <td><span class="badge badge-licit">En Licitación</span></td>
+                            <td><a class="link">Ver detalle</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>REQ-0040</strong></td>
+                            <td>Combustible tractores (500 gal)</td>
+                            <td>Campo</td>
+                            <td><span class="prio-alta">Alta</span></td>
+                            <td>M. García</td>
+                            <td>04/05/26</td>
+                            <td><span class="badge badge-rev">En revisión</span></td>
+                            <td><a class="link">Ver detalle</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>REQ-0039</strong></td>
+                            <td>Uniformes personal de campo (x40)</td>
+                            <td>RRHH</td>
+                            <td><span class="prio-media">Media</span></td>
+                            <td>L. Torres</td>
+                            <td>03/05/26</td>
+                            <td><span class="badge badge-pend">Pendiente</span></td>
+                            <td><a class="link">Ver detalle</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>REQ-0038</strong></td>
+                            <td>Lubricante industrial SAE 40 (x20 L)</td>
+                            <td>Fábrica</td>
+                            <td><span class="prio-media">Media</span></td>
+                            <td>R. Quispe</td>
+                            <td>02/05/26</td>
+                            <td><span class="badge badge-aprov">Aprobado</span></td>
+                            <td><a class="link">Ver detalle</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>REQ-0037</strong></td>
+                            <td>Equipos de protección personal (x25)</td>
+                            <td>Logística</td>
+                            <td><span class="prio-baja">Baja</span></td>
+                            <td>C. Díaz</td>
+                            <td>01/05/26</td>
+                            <td><span class="badge badge-rech">Rechazado</span></td>
+                            <td><a class="link">Ver detalle</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Detail Panel -->
+            <div class="detail-box">
+
+                <div class="detail-box-header">
+                    <h3>REQ-0041 — Repuestos molino principal #1 &nbsp;|&nbsp; Detalle y Proceso de Licitación</h3>
+                    <span class="badge badge-licit">En Licitación</span>
+                </div>
+
+                <!-- Flow -->
+                <p class="section-title">Flujo del Proceso</p>
+                <div class="flow">
+                    <div class="flow-step done">1. Solicitud creada</div>
+                    <div class="flow-arrow">▶</div>
+                    <div class="flow-step done">2. Publicado a proveedores</div>
+                    <div class="flow-arrow">▶</div>
+                    <div class="flow-step current">3. Recepción de ofertas</div>
+                    <div class="flow-arrow">▶</div>
+                    <div class="flow-step">4. Evaluación y selección</div>
+                    <div class="flow-arrow">▶</div>
+                    <div class="flow-step">5. Aprobación y firma digital</div>
+                    <div class="flow-arrow">▶</div>
+                    <div class="flow-step">6. Orden de compra emitida</div>
+                </div>
+
+                <!-- Detail Body -->
+                <div class="detail-body">
+
+                    <!-- Left: fields -->
+                    <div>
+                        <div class="detail-field">
+                            <label>Área Solicitante</label>
+                            <div class="field-val">Fábrica</div>
+                        </div>
+                        <div class="detail-field">
+                            <label>Solicitante</label>
+                            <div class="field-val">Juan Pérez</div>
+                        </div>
+                        <div class="detail-field">
+                            <label>Prioridad</label>
+                            <div class="field-val alta">Alta</div>
+                        </div>
+                        <div class="detail-field">
+                            <label>Fecha Límite Oferta</label>
+                            <div class="field-val">08/05/2026</div>
+                        </div>
+                        <div class="detail-field">
+                            <label>Detalle</label>
+                            <div class="field-val">Rodamiento SKF 6205, eje de transmisión, 2 unidades c/u</div>
+                        </div>
+                    </div>
+
+                    <!-- Right: offers meta + docs -->
+                    <div>
+                        <p class="offers-label">Recepción de Ofertas</p>
+                        <p class="offers-meta">Proveedores invitados: <strong>6</strong> &nbsp;|&nbsp; Ofertas recibidas: <strong>4</strong></p>
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <p class="progress-label">67% de participación — cierre en 3 días</p>
+
+                        <p class="offers-label">Documentos Adjuntos</p>
+                        <div class="doc-list">
+                            <div class="doc-item">Especificaciones_REQ0041.pdf</div>
+                            <div class="doc-item">Planos_tecnico_molino.pdf</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Offers Table -->
+                <p class="section-title">Comparativo de Ofertas</p>
+                <div class="offers-table-wrap">
+                    <table class="offers-table">
+                        <thead>
+                            <tr>
+                                <th>Proveedor</th>
+                                <th>Precio Unit. (S/.)</th>
+                                <th>Cant.</th>
+                                <th>Total (S/.)</th>
+                                <th>Plazo entrega</th>
+                                <th>Garantía</th>
+                                <th>Calificación</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="row-selected">
+                                <td>Distribuidora Nortek</td>
+                                <td>185.00</td>
+                                <td>4</td>
+                                <td>740.00</td>
+                                <td>3 días</td>
+                                <td>12 meses</td>
+                                <td><span class="stars-dark">★★★★★</span></td>
+                                <td><button class="btn-sel">Seleccionado</button></td>
+                            </tr>
+                            <tr>
+                                <td>Industrial Perú SAC</td>
+                                <td>210.00</td>
+                                <td>4</td>
+                                <td>840.00</td>
+                                <td>5 días</td>
+                                <td>6 meses</td>
+                                <td><span class="stars">★★★★</span></td>
+                                <td><button class="btn-eval">En evaluación</button></td>
+                            </tr>
+                            <tr>
+                                <td>Maq. & Suministros E.I.R.L</td>
+                                <td>198.50</td>
+                                <td>4</td>
+                                <td>794.00</td>
+                                <td>7 días</td>
+                                <td>6 meses</td>
+                                <td><span class="stars">★★★</span></td>
+                                <td><button class="btn-eval">En evaluación</button></td>
+                            </tr>
+                            <tr>
+                                <td>Repuestos del Norte</td>
+                                <td>220.00</td>
+                                <td>4</td>
+                                <td>880.00</td>
+                                <td>10 días</td>
+                                <td>3 meses</td>
+                                <td><span class="stars">★★</span></td>
+                                <td><button class="btn-eval">En evaluación</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div><!-- /detail-box -->
+
+            <!-- Legend -->
+            <div class="legend">
+                <span><span class="legend-dot dot-campo"></span> Campo</span>
+                <span><span class="legend-dot dot-planta"></span> Planta</span>
+                <span><span class="legend-dot dot-log"></span> Logística</span>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tabs button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Sidebar navigation
+        document.querySelectorAll('.sidebar li').forEach(li => {
+            li.addEventListener('click', () => {
+                document.querySelectorAll('.sidebar li').forEach(l => l.classList.remove('active'));
+                li.classList.add('active');
+            });
+        });
+    </script>
+
+</body>
+</html>
