@@ -20,6 +20,7 @@ def insertar_personal(personal):
         conn = obtener_conexion()
 
         if conn is None:
+            print("No se pudo conectar a la BD.")
             return False
 
         with conn:
@@ -30,7 +31,6 @@ def insertar_personal(personal):
                      tipo_usuario, area, puesto, fecha_ingreso)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
-
                 cursor.execute(sql, (
                     personal.dni,
                     personal.nombres,
@@ -42,7 +42,6 @@ def insertar_personal(personal):
                     personal.puesto,
                     personal.fecha_ingreso
                 ))
-
             conn.commit()
 
         return True
