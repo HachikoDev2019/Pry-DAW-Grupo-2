@@ -20,4 +20,21 @@ CREATE TABLE IF NOT EXISTS solicitudes (
     estado ENUM('Pendiente', 'En revisión', 'Aprobado', 'Rechazado') DEFAULT 'Pendiente',
     comentario TEXT,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+CREATE TABLE personal (
+    id_personal INT AUTO_INCREMENT PRIMARY KEY,
+
+    dni CHAR(8) NOT NULL UNIQUE,
+    nombres VARCHAR(100) NOT NULL,
+    apellidos VARCHAR(100) NOT NULL,
+    telefono VARCHAR(15),
+    correo VARCHAR(100),
+    tipo_usuario ENUM('Administrador', 'Trabajador') NOT NULL DEFAULT 'Trabajador',
+    area VARCHAR(100) NOT NULL, 
+    puesto VARCHAR(100) NOT NULL, 
+    fecha_ingreso DATE NOT NULL,
+    estado ENUM('Activo', 'Inactivo') NOT NULL DEFAULT 'Activo',
+    observaciones TEXT
 );
+
+
