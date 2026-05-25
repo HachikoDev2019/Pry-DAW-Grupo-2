@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Solicitudes{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Gestión de solicitudes</h1>
+    <p>Listado general de solicitudes registradas por los trabajadores.</p>
+</section>
+
+<section class="content-card">
+    <form method="GET" action="{{ url_for('gestion_solicitudes') }}" class="filter-card">
+        <div class="filter-group">
+            <label>Estado</label>
+            <select name="estado">
+                <option value="">Todos</option>
+                <option value="Pendiente" {% if estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                <option value="En revisión" {% if estado == 'En revisión' %}selected{% endif %}>En revisión</option>
+                <option value="Aprobado" {% if estado == 'Aprobado' %}selected{% endif %}>Aprobado</option>
+                <option value="Rechazado" {% if estado == 'Rechazado' %}selected{% endif %}>Rechazado</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Área</label>
+            <select name="area">
+                <option value="">Todas</option>
+                <option value="Campo" {% if area == 'Campo' %}selected{% endif %}>Campo</option>
+                <option value="Fábrica" {% if area == 'Fábrica' %}selected{% endif %}>Fábrica</option>
+                <option value="Logística" {% if area == 'Logística' %}selected{% endif %}>Logística</option>
+                <option value="Mantenimiento" {% if area == 'Mantenimiento' %}selected{% endif %}>Mantenimiento</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Prioridad</label>
+            <select name="prioridad">
+                <option value="">Todas</option>
+                <option value="Alta" {% if prioridad == 'Alta' %}selected{% endif %}>Alta</option>
+                <option value="Media" {% if prioridad == 'Media' %}selected{% endif %}>Media</option>
+                <option value="Baja" {% if prioridad == 'Baja' %}selected{% endif %}>Baja</option>
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn-primary">Filtrar</button>
+            <a href="{{ url_for('gestion_solicitudes') }}" class="btn-secondary">Limpiar</a>
+        </div>
+    </form>
+
+    <div class="section-actions">
+        <h2>Lista de solicitudes</h2>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Trabajador</th>
+                    <th>Descripción</th>
+                    <th>Área</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Comentario</th>
+                    <th>Fecha</th>
+                    <th>Actualizar</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if solicitudes %}
+                    {% for solicitud in solicitudes %}
+                    <tr>
+                        <td>{{ solicitud.id_solicitud }}</td>
+                        <td>{{ solicitud.trabajador }}</td>
+                        <td>{{ solicitud.descripcion }}</td>
+                        <td>{{ solicitud.area }}</td>
+                        <td>{{ solicitud.prioridad }}</td>
+                        <td>
+                            <span class="status-badge status-{{ solicitud.estado|replace(' ', '-')|lower }}">
+                                {{ solicitud.estado }}
+                            </span>
+                        </td>
+                        <td>{{ solicitud.comentario or 'Sin comentario' }}</td>
+                        <td>{{ solicitud.fecha_registro }}</td>
+                        <td>
+                            <button
+                                type="button"
+                                class="btn-small"
+                                onclick="abrirModalActualizar('{{ solicitud.id_solicitud }}', '{{ solicitud.estado }}', `{{ solicitud.comentario or '' }}`)"
+                            >
+                                Actualizar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr class="empty-row">
+                        <td colspan="9">No hay solicitudes registradas con los filtros seleccionados.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<div class="modal-overlay" id="modalActualizarSolicitud">
+    <div class="modal">
+        <h2>Actualizar solicitud</h2>
+
+        <form action="{{ url_for('actualizar_solicitud_estado') }}" method="POST">
+            <input type="hidden" id="id_solicitud" name="id_solicitud">
+
+            <div class="form-group full">
+                <label>Estado</label>
+                <select id="estado_solicitud" name="estado" required>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En revisión">En revisión</option>
+                    <option value="Aprobado">Aprobado</option>
+                    <option value="Rechazado">Rechazado</option>
+                </select>
+            </div>
+
+            <div class="form-group full">
+                <label>Comentario</label>
+                <textarea id="comentario_solicitud" name="comentario" placeholder="Ingrese un comentario para el trabajador"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="cerrarModalActualizar()">Cancelar</button>
+                <button type="submit" class="btn-primary">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirModalActualizar(id, estado, comentario) {
+    document.getElementById("id_solicitud").value = id;
+    document.getElementById("estado_solicitud").value = estado;
+    document.getElementById("comentario_solicitud").value = comentario;
+    document.getElementById("modalActualizarSolicitud").classList.add("open");
+}
+
+function cerrarModalActualizar() {
+    document.getElementById("modalActualizarSolicitud").classList.remove("open");
+}
+</script>
+
+{% endblock %}

@@ -14,7 +14,7 @@
         <div class="logo">Pomalca</div>
 
         <div class="system-title">
-            SISTEMA DE GESTIÓN DE REQUERIMIENTOS INTERNOS
+            SISTEMA DE GESTIÓN 
         </div>
 
         <div class="user-info">
@@ -51,11 +51,15 @@
                         Mis Solicitudes
                     </a>
                 </li>
-
+                <li>
+                    <a class="{% if request.path == '/gestion_solicitudes' %}active{% endif %}"
+                        href="{{ url_for('gestion_solicitudes') }}">
+                        Gestión de Solicitudes
+                    </a>
+                </li>
                 <li>
                     <a href="#">Requerimientos</a>
                 </li>
-
                 <li>
                     <a href="#">Catálogo de Artículos</a>
                 </li>

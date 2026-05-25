@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from maquinariaAD import clsMaquinaria, insertar_maquinaria
-from solicitudAD import clsSolicitud, insertar_solicitud, listar_mis_solicitudes
+from solicitudAD import (clsSolicitud, insertar_solicitud, listar_mis_solicitudes, listar_todas_solicitudes, actualizar_solicitud)
 
 app = Flask(__name__)
 app.secret_key = "pomalca_secret_key"
@@ -76,6 +76,41 @@ def mis_solicitudes():
         "solicitudes/mis_solicitudes.html",
         solicitudes=solicitudes
     )
+
+@app.route("/gestion_solicitudes")
+def gestion_solicitudes():
+    estado = request.args.get("estado")
+    area = request.args.get("area")
+    prioridad = request.args.get("prioridad")
+
+    solicitudes = listar_todas_solicitudes(estado, area, prioridad)
+
+    return render_template(
+        "solicitudes/gestion_solicitudes.html",
+        solicitudes=solicitudes,
+        estado=estado,
+        area=area,
+        prioridad=prioridad
+    )
+
+
+@app.route("/actualizar_solicitud", methods=["POST"])
+def actualizar_solicitud_estado():
+    try:
+        id_solicitud = request.form["id_solicitud"]
+        estado = request.form["estado"]
+        comentario = request.form["comentario"]
+
+        if actualizar_solicitud(id_solicitud, estado, comentario):
+            flash("Solicitud actualizada correctamente.", "success")
+        else:
+            flash("Error al actualizar la solicitud.", "error")
+
+        return redirect(url_for("gestion_solicitudes"))
+
+    except Exception as e:
+        flash(f"Error inesperado: {repr(e)}", "error")
+        return redirect(url_for("gestion_solicitudes"))
 
 
 if __name__ == "__main__":
