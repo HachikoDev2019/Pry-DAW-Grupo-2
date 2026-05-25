@@ -32,7 +32,8 @@ cd Pry-DAW-Grupo-2
 python -3 venv .venv
 #opcion 2
 py -3 venv .venv 
-```
+#opcion 3`
+python -m venv .venv
 
 ### 4. Activar entorno virtual
 
