@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from maquinariaAD import clsMaquinaria, insertar_maquinaria
 from solicitudAD import (clsSolicitud, insertar_solicitud, listar_mis_solicitudes, listar_todas_solicitudes, actualizar_solicitud)
+from personalAD import clsPersonal, insertar_personal
 
 app = Flask(__name__)
 app.secret_key = "pomalca_secret_key"
@@ -8,7 +9,7 @@ app.secret_key = "pomalca_secret_key"
 
 @app.route("/")
 def dashboard():
-    return render_template("dashboard.html")
+    return render_template("registro.html")
 
 
 @app.route("/registro_maquinaria")
@@ -111,6 +112,37 @@ def actualizar_solicitud_estado():
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("gestion_solicitudes"))
+    
+@app.route("/registro")
+def registro():
+    return render_template("registro.html")
+ 
+ 
+@app.route("/guardar_personal", methods=["POST"])
+def guardar_personal():
+    try:
+        personal = clsPersonal(
+            request.form["dni"],
+            request.form["nombres"],
+            request.form["apellidos"],
+            request.form["telefono"],
+            request.form["correo"],
+            request.form["tipo_usuario"],
+            request.form["area"],
+            request.form["puesto"],
+            request.form["fecha_ingreso"]
+        )
+ 
+        if insertar_personal(personal):
+            flash("Cuenta creada correctamente.", "success")
+            return redirect(url_for("registro"))
+ 
+        flash("Error al crear la cuenta.", "error")
+        return redirect(url_for("registro"))
+ 
+    except Exception as e:
+        flash(f"Error inesperado: {repr(e)}", "error")
+        return redirect(url_for("registro"))
 
 
 if __name__ == "__main__":
