@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro de Personal - Azucarera Pomalca{% endblock %}
+
+{% block content %}
+<div class="form-container-wrapper">
+    <div class="form-card" style="max-width: 800px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="logo" style="display: inline-block; margin-bottom: 15px;">POMALCA</div>
+            <h1>Registro de Nuevo Personal</h1>
+            <p style="font-size: 14px; color: #7f8c8d; margin-top: -25px;">Alta de trabajadores en la base de datos de la empresa</p>
+        </div>
+
+        <form action="" method="POST">
+            <div class="modal-grid">
+                <div class="form-group">
+                    <label for="dni">DNI (Único)</label>
+                    <input type="text" id="dni" name="dni" placeholder="8 dígitos" maxlength="8" required pattern="\d{8}">
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha_ingreso">Fecha de Ingreso</label>
+                    <input type="date" id="fecha_ingreso" name="fecha_ingreso" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nombres">Nombres</label>
+                    <input type="text" id="nombres" name="nombres" placeholder="Ej. Juan Carlos" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="apellidos">Apellidos</label>
+                    <input type="text" id="apellidos" name="apellidos" placeholder="Ej. Pérez Ramos" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="Ej. 987654321">
+                </div>
+
+                <div class="form-group">
+                    <label for="correo">Correo Electrónico</label>
+                    <input type="email" id="correo" name="correo" placeholder="ejemplo@pomalca.com.pe">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo_usuario">Tipo de Usuario</label>
+                    <select id="tipo_usuario" name="tipo_usuario" required>
+                        <option value="Trabajador" selected>Trabajador</option>
+                        <option value="Administrador">Administrador</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="area">Área Destino</label>
+                    <select id="area" name="area" required>
+                        <option value="">— Seleccionar Área —</option>
+                        <option value="Campo">Campo / Cultivo</option>
+                        <option value="Fábrica">Fábrica / Planta</option>
+                        <option value="Logística">Logística y Distribución</option>
+                        <option value="Administración">Administración y Finanzas</option>
+                        <option value="Mantenimiento">Mantenimiento Industrial</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="puesto">Puesto / Cargo</label>
+                    <input type="text" id="puesto" name="puesto" placeholder="Ej. Supervisor de Cosecha / Operario" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="estado">Estado Inicial</label>
+                    <select id="estado" name="estado" required>
+                        <option value="Activo" selected>Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                    </select>
+                </div>
+
+                <div class="form-group full">
+                    <label for="observaciones">Observaciones / Notas Adicionales</label>
+                    <textarea id="observaciones" name="observaciones" placeholder="Detalles médicos, herramientas asignadas o información relevante del ingreso..."></textarea>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 34px; border-top: 1px solid #eeeeee; padding-top: 20px;">
+                <a href="./login.html" class="btn-secondary" style="text-decoration: none; text-align: center;">Volver al Login</a>
+                <button type="submit" class="btn-submit" style="margin: 0; width: 220px;">Registrar Personal</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
