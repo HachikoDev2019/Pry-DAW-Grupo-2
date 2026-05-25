@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS personal (
     apellidos VARCHAR(100) NOT NULL,
     telefono VARCHAR(15),
     correo VARCHAR(100),
+    password VARCHAR(255) NOT NULL, -- Nueva columna agregada
     tipo_usuario ENUM('Administrador', 'Trabajador') NOT NULL DEFAULT 'Trabajador',
     area VARCHAR(100) NOT NULL,
     puesto VARCHAR(100) NOT NULL,
