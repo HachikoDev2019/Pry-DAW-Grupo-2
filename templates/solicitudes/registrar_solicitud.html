@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Solicitud{% endblock %}
+
+{% block content %}
+
+<section class="form-card">
+    <h1>Registrar solicitud</h1>
+
+    <form action="{{ url_for('guardar_solicitud') }}" method="POST">
+        <div class="form-row">
+            <label>Trabajador</label>
+            <input type="text" name="trabajador" value="Trabajador Demo" required>
+        </div>
+
+        <div class="form-row">
+            <label>Descripción</label>
+            <input type="text" name="descripcion" required>
+        </div>
+
+        <div class="form-row">
+            <label>Área</label>
+            <select name="area" required>
+                <option value="Campo">Campo</option>
+                <option value="Fábrica">Fábrica</option>
+                <option value="Logística">Logística</option>
+                <option value="Mantenimiento">Mantenimiento</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Prioridad</label>
+            <select name="prioridad" required>
+                <option value="Alta">Alta</option>
+                <option value="Media">Media</option>
+                <option value="Baja">Baja</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-submit">
+            Guardar solicitud
+        </button>
+    </form>
+</section>
+
+{% endblock %}

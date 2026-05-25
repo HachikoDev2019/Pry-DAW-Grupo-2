@@ -1,5 +1,5 @@
 import pymysql.cursors
-
+from bd import obtener_conexion
 
 class clsMaquinaria:
     def __init__(self, nombre_codigo, tipo, marca, modelo, area, estado, observaciones):
@@ -10,21 +10,6 @@ class clsMaquinaria:
         self.area = area
         self.estado = estado
         self.observaciones = observaciones
-
-
-def obtener_conexion():
-    try:
-        return pymysql.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="db_pomalca",
-            cursorclass=pymysql.cursors.DictCursor
-        )
-    except Exception as e:
-        print("Error de conexión:", repr(e))
-        return None
-
 
 def insertar_maquinaria(maquinaria):
     try:

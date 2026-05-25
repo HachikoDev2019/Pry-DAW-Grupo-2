@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Solicitudes{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Mis solicitudes</h1>
+    <p>Consulta el estado de las solicitudes registradas.</p>
+</section>
+
+<section class="content-card">
+    <div class="section-actions">
+        <h2>Listado de solicitudes</h2>
+        <a href="{{ url_for('registrar_solicitud') }}" class="btn-primary">
+            + Registrar solicitud
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Descripción</th>
+                    <th>Área</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Comentario</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if solicitudes %}
+                    {% for solicitud in solicitudes %}
+                    <tr>
+                        <td>{{ solicitud.id_solicitud }}</td>
+                        <td>{{ solicitud.descripcion }}</td>
+                        <td>{{ solicitud.area }}</td>
+                        <td>{{ solicitud.prioridad }}</td>
+                        <td>{{ solicitud.estado }}</td>
+                        <td>{{ solicitud.comentario or 'Sin comentario' }}</td>
+                        <td>{{ solicitud.fecha_registro }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr class="empty-row">
+                        <td colspan="7">No tiene solicitudes registradas.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,75 +1,92 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Pomalca{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
+
 <body>
 
-<header class="topbar">
-    <div class="logo">Pomalca</div>
+    <header class="topbar">
+        <div class="logo">Pomalca</div>
 
-    <div class="system-title">
-        SISTEMA DE GESTIÓN DE REQUERIMIENTOS INTERNOS
-    </div>
+        <div class="system-title">
+            SISTEMA DE GESTIÓN DE REQUERIMIENTOS INTERNOS
+        </div>
 
-    <div class="user-info">
-        <strong>Admin</strong>
-        <span>Cerrar Sesión</span>
-    </div>
-</header>
+        <div class="user-info">
+            <strong>Admin</strong>
+            <span>Cerrar Sesión</span>
+        </div>
+    </header>
 
-<div class="layout">
-    <aside class="sidebar">
-        <ul>
-            <li>
-                <a class="{% if request.path == '/' %}active{% endif %}" href="{{ url_for('dashboard') }}">
-                    Dashboard
-                </a>
-            </li>
+    <div class="layout">
+        <aside class="sidebar">
+            <ul>
+                <li>
+                    <a class="{% if request.path == '/' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                        Dashboard
+                    </a>
+                </li>
 
-            <li>
-                <a class="{% if request.path == '/registro_maquinaria' %}active{% endif %}" href="{{ url_for('registro_maquinaria') }}">
-                    Maquinaria
-                </a>
-            </li>
+                <li>
+                    <a class="{% if request.path == '/registro_maquinaria' %}active{% endif %}"
+                        href="{{ url_for('registro_maquinaria') }}">
+                        Maquinaria
+                    </a>
+                </li>
+                <li>
+                    <a class="{% if request.path == '/registrar_solicitud' %}active{% endif %}"
+                        href="{{ url_for('registrar_solicitud') }}">
+                        Registrar Solicitud
+                    </a>
+                </li>
 
-            <li>
-                <a href="#">Requerimientos</a>
-            </li>
+                <li>
+                    <a class="{% if request.path == '/mis_solicitudes' %}active{% endif %}"
+                        href="{{ url_for('mis_solicitudes') }}">
+                        Mis Solicitudes
+                    </a>
+                </li>
 
-            <li>
-                <a href="#">Catálogo de Artículos</a>
-            </li>
+                <li>
+                    <a href="#">Requerimientos</a>
+                </li>
 
-            <li>
-                <a href="#">Reportes</a>
-            </li>
+                <li>
+                    <a href="#">Catálogo de Artículos</a>
+                </li>
 
-            <li>
-                <a href="#">Configuración</a>
-            </li>
-        </ul>
-    </aside>
+                <li>
+                    <a href="#">Reportes</a>
+                </li>
 
-    <main class="main-content">
-        {% with messages = get_flashed_messages(with_categories=true) %}
+                <li>
+                    <a href="#">Configuración</a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert {{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+            {% for category, message in messages %}
+            <div class="alert {{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
             {% endif %}
-        {% endwith %}
+            {% endwith %}
 
-        {% block content %}
-        {% endblock %}
-    </main>
-</div>
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
 
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
+
 </html>

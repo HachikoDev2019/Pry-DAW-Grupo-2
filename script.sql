@@ -11,3 +11,13 @@ CREATE TABLE maquinaria (
     
     observaciones TEXT
 );
+CREATE TABLE IF NOT EXISTS solicitudes (
+    id_solicitud INT AUTO_INCREMENT PRIMARY KEY,
+    trabajador VARCHAR(100) NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
+    area VARCHAR(100) NOT NULL,
+    prioridad ENUM('Alta', 'Media', 'Baja') NOT NULL,
+    estado ENUM('Pendiente', 'En revisión', 'Aprobado', 'Rechazado') DEFAULT 'Pendiente',
+    comentario TEXT,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
