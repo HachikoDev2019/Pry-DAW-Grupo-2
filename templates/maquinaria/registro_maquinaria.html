@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro de Maquinaria{% endblock %}
+
+{% block content %}
+
+<section class="form-card">
+    <h1>Registro de maquinaria</h1>
+
+    <form action="{{ url_for('guardar_maquinaria') }}" method="POST">
+        <div class="form-row">
+            <label for="nombre_codigo">Nombre/Código</label>
+            <input type="text" id="nombre_codigo" name="nombre_codigo" required>
+        </div>
+
+        <div class="form-row">
+            <label for="tipo">Tipo</label>
+            <input type="text" id="tipo" name="tipo" placeholder="Ej. Tractor, Caldera..." required>
+        </div>
+
+        <div class="form-row">
+            <label for="marca">Marca</label>
+            <input type="text" id="marca" name="marca">
+        </div>
+
+        <div class="form-row">
+            <label for="modelo">Modelo</label>
+            <input type="text" id="modelo" name="modelo">
+        </div>
+
+        <div class="form-row">
+            <label for="area">Área</label>
+            <select id="area" name="area">
+                <option value="Campo">Campo</option>
+                <option value="Fábrica">Fábrica</option>
+                <option value="Logística">Logística</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado">
+                <option value="Operativo">Operativo</option>
+                <option value="En Mantenimiento">En Mantenimiento</option>
+                <option value="Inactivo">Inactivo</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label for="observaciones">Observaciones</label>
+            <textarea id="observaciones" name="observaciones" rows="4"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">
+            Registrar
+        </button>
+    </form>
+</section>
+
+{% endblock %}

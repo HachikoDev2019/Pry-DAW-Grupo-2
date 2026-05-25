@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Portal de Requerimientos y Licitaciones</h1>
+    <p>Gestión de solicitudes internas y proceso de cotización con proveedores</p>
+</section>
+
+<div class="tabs">
+    <button class="active">Requerimientos</button>
+    <button>Licitaciones</button>
+    <button>Proveedores</button>
+    <button>Aprobaciones</button>
+</div>
+
+<section class="stats-grid">
+    <div class="stat-card">
+        <span>Requerimientos Abiertos</span>
+        <strong id="statAbiertos">0</strong>
+        <small id="statAltaPrio">—</small>
+    </div>
+
+    <div class="stat-card">
+        <span>En Licitación</span>
+        <strong id="statLicit">0</strong>
+        <small id="statLicitSub">—</small>
+    </div>
+
+    <div class="stat-card">
+        <span>Pendiente Aprobación</span>
+        <strong id="statPend">0</strong>
+        <small>esperando firma digital</small>
+    </div>
+
+    <div class="stat-card">
+        <span>Cerrados Este Mes</span>
+        <strong id="statCerrados">0</strong>
+        <small>este mes</small>
+    </div>
+</section>
+
+<section class="content-card">
+    <div class="section-actions">
+        <h2>Lista de Requerimientos</h2>
+        <button class="btn-primary" onclick="openModal()">+ Nuevo Requerimiento</button>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Área</th>
+                    <th>Prioridad</th>
+                    <th>Solicitante</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+
+            <tbody id="reqBody">
+                <tr class="empty-row">
+                    <td colspan="8">
+                        No hay requerimientos registrados. Haga clic en "+ Nuevo Requerimiento" para comenzar.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<div class="legend">
+    <span><i class="dot campo"></i> Campo</span>
+    <span><i class="dot planta"></i> Planta</span>
+    <span><i class="dot logistica"></i> Logística</span>
+</div>
+
+<div class="modal-overlay" id="modalReq">
+    <div class="modal">
+        <h2>Nuevo Requerimiento</h2>
+
+        <div class="modal-grid">
+            <div class="form-group">
+                <label>Código</label>
+                <input type="text" id="fCodigo" placeholder="Ej. REQ-0042">
+            </div>
+
+            <div class="form-group">
+                <label>Fecha</label>
+                <input type="date" id="fFecha">
+            </div>
+
+            <div class="form-group full">
+                <label>Descripción</label>
+                <input type="text" id="fDesc" placeholder="Descripción del requerimiento">
+            </div>
+
+            <div class="form-group">
+                <label>Área</label>
+                <select id="fArea">
+                    <option value="">— Seleccionar —</option>
+                    <option>Campo</option>
+                    <option>Fábrica</option>
+                    <option>Logística</option>
+                    <option>Administración</option>
+                    <option>Mantenimiento</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Prioridad</label>
+                <select id="fPrio">
+                    <option value="">— Seleccionar —</option>
+                    <option>Alta</option>
+                    <option>Media</option>
+                    <option>Baja</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Solicitante</label>
+                <input type="text" id="fSolic" placeholder="Nombre del solicitante">
+            </div>
+
+            <div class="form-group">
+                <label>Estado</label>
+                <select id="fEstado">
+                    <option value="">— Seleccionar —</option>
+                    <option>Pendiente</option>
+                    <option>En revisión</option>
+                    <option>En Licitación</option>
+                    <option>Aprobado</option>
+                    <option>Rechazado</option>
+                </select>
+            </div>
+
+            <div class="form-group full">
+                <label>Observaciones</label>
+                <textarea id="fObs" placeholder="Detalle del requerimiento"></textarea>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+            <button class="btn-primary" onclick="saveReq()">Guardar Requerimiento</button>
+        </div>
+    </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+{% endblock %}
