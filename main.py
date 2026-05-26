@@ -184,6 +184,14 @@ def registro_maquinaria():
 
     return render_template("maquinaria/registro_maquinaria.html")
 
+@app.route("/api_listarmaquinarias", methods=['POST'])
+def api_listarmaquinarias():
+    try:
+        resultado = listar_maquinarias()
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": repr(e)})
+
 
 @app.route("/guardar_maquinaria", methods=["POST"])
 def guardar_maquinaria():
@@ -216,6 +224,42 @@ def guardar_maquinaria():
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("registro_maquinaria"))
+
+@app.route("/api_guardar_maquinaria", methods=["POST"])
+def api_guardar_maquinaria():
+    try:
+        data = request.json
+
+        objMaquinaria = clsMaquinaria(
+            0,
+            data["nombre_codigo"],
+            data["tipo"],
+            data["marca"],
+            data["modelo"],
+            data["area"],
+            data["estado"],
+            data["observaciones"]
+        )
+
+        if insertar_maquinaria(objMaquinaria):
+            return jsonify({
+                "code": 1,
+                "data": {},
+                "message": "Maquinaria insertada correctamente"
+            })
+
+        return jsonify({
+            "code": 0,
+            "data": {},
+            "message": "Error al insertar maquinaria"
+        })
+
+    except Exception as e:
+        return jsonify({
+            "code": -1,
+            "data": {},
+            "message": repr(e)
+        })
 
 
 @app.route("/mis_maquinarias")
