@@ -39,7 +39,7 @@ def listar_mis_solicitudes(trabajador):
     try:
         conn = obtener_conexion()
         if conn is None:
-            return False
+            return []
         with conn:
             with conn.cursor() as cursor:
                 sql = """

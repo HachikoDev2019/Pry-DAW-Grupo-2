@@ -14,16 +14,16 @@
         <div class="logo">Pomalca</div>
 
         <div class="system-title">
-            SISTEMA DE GESTIÓN 
+            SISTEMA DE GESTIÓN
         </div>
 
         <div class="user-info">
             <strong>{{ session.get('nombres', 'Usuario') }}</strong>
             <span style="font-size: 11px; color: #a0b0c0;">{{ session.get('tipo_usuario', '') }}</span>
-            <form action="{{ url_for('logout') }}" method="POST" style="display: inline;">
-              <button type="submit" class="button-out">
-               Cerrar Sesión
-              </button>
+            <form action="{{ url_for('logout') }}" method="POST" class="logout-form">
+                <button type="submit" class="logout-btn">
+                    Cerrar sesión
+                </button>
             </form>
         </div>
     </header>
@@ -32,23 +32,43 @@
         <aside class="sidebar">
             <ul>
                 <li>
-                    <a class="{% if request.path == '/' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                    <a class="{% if request.path == '/dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
                         Dashboard
                     </a>
                 </li>
 
+                {% if session.get('tipo_usuario') == 'Administrador' %}
                 <li>
-                    <a class="{% if request.path == '/registro_maquinaria' %}active{% endif %}"
-                        href="{{ url_for('registro_maquinaria') }}">
+                    <a class="{% if request.path == '/gestion_solicitudes' %}active{% endif %}"
+                        href="{{ url_for('gestion_solicitudes') }}">
+                        Gestión de Solicitudes
+                    </a>
+                </li>
+
+                <li>
+                    <a class="{% if request.path == '/mis_maquinarias' or request.path == '/registro_maquinaria' %}active{% endif %}"
+                        href="{{ url_for('mis_maquinarias') }}">
                         Maquinaria
                     </a>
                 </li>
+
                 <li>
-                   <a class="{% if request.path.startswith('/actividad') %}active{% endif %}"
-                     href="{{ url_for('actividad_maquinaria') }}">
-                      Actividad Maquinaria
+                    <a class="{% if request.path.startswith('/actividad') %}active{% endif %}"
+                        href="{{ url_for('actividad_maquinaria') }}">
+                        Actividad Maquinaria
                     </a>
                 </li>
+
+                <li>
+                    <a href="#">Reportes</a>
+                </li>
+
+                <li>
+                    <a href="#">Configuración</a>
+                </li>
+                {% endif %}
+
+                {% if session.get('tipo_usuario') == 'Trabajador' %}
                 <li>
                     <a class="{% if request.path == '/registrar_solicitud' %}active{% endif %}"
                         href="{{ url_for('registrar_solicitud') }}">
@@ -62,31 +82,9 @@
                         Mis Solicitudes
                     </a>
                 </li>
-                {% if session.get('tipo_usuario') == 'Administrador' %}
-                <li>
-                    <a class="{% if request.path == '/gestion_solicitudes' %}active{% endif %}"
-                        href="{{ url_for('gestion_solicitudes') }}">
-                        Gestión de Solicitudes
-                    </a>
-                </li>
                 {% endif %}
-                <li>
-                    <a href="#">Requerimientos</a>
-                </li>
-                <li>
-                    <a href="#">Catálogo de Artículos</a>
-                </li>
-
-                <li>
-                    <a href="#">Reportes</a>
-                </li>
-
-                <li>
-                    <a href="#">Configuración</a>
-                </li>
             </ul>
         </aside>
-
         <main class="main-content">
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}

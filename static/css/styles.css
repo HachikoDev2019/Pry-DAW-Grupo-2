@@ -50,15 +50,24 @@ body {
 }
 
 .user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2px;
+    min-width: 170px;
+}
+
+.user-info strong {
     font-size: 14px;
-    text-align: right;
+    color: #2d3436;
+    line-height: 1.1;
 }
 
 .user-info span {
-    display: block;
-    margin-top: 4px;
-    color: #e74c3c;
-    font-size: 12px;
+    color: #8a99aa;
+    font-size: 11px;
+    line-height: 1.1;
 }
 
 /* LAYOUT */
@@ -662,13 +671,21 @@ body.login-body, body:has(.card) {
     margin-left: 2px;
 }
 
-.button-out{
-    background: #e74c3c;
-    color: white;
+.logout-form {
+    margin: 2px 0 0;
+}
+
+.logout-btn {
+    background: transparent;
     border: none;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 13px;
+    color: #e74c3c;
+    padding: 0;
     cursor: pointer;
-    margin-left: 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.logout-btn:hover {
+    text-decoration: underline;
+    color: #c0392b;
 }

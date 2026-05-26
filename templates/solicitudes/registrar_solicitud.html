@@ -10,7 +10,7 @@
     <form action="{{ url_for('guardar_solicitud') }}" method="POST">
         <div class="form-row">
             <label>Trabajador</label>
-            <input type="text" name="trabajador" value="Trabajador Demo" required>
+            <input type="text" name="trabajador" value="{{ trabajador }}" required>
         </div>
 
         <div class="form-row">
