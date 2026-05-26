@@ -42,3 +42,34 @@ CREATE TABLE IF NOT EXISTS solicitudes (
     comentario TEXT,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+
+INSERT INTO personal (
+    dni,
+    nombres,
+    apellidos,
+    telefono,
+    correo,
+    password,
+    tipo_usuario,
+    area,
+    puesto,
+    fecha_ingreso,
+    estado,
+    observaciones
+)
+VALUES (
+    '12345678',
+    'Admin',
+    'Principal',
+    '999999999',
+    'admin@gmail.com',
+    '1234',
+    'Administrador',
+    'Sistemas',
+    'Administrador',
+    '2026-05-26',
+    'Activo',
+    'Acceso principal'
+);

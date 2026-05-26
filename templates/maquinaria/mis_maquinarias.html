@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Maquinarias{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Mis maquinarias</h1>
+    <p>Consulta y gestiona las maquinarias registradas en el sistema.</p>
+</section>
+
+<section class="content-card">
+    <div class="section-actions">
+        <h2>Inventario de maquinaria</h2>
+        <a href="{{ url_for('registro_maquinaria') }}" class="btn-primary">
+            Registrar maquinaria
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre / Código</th>
+                    <th>Tipo</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Área</th>
+                    <th>Estado</th>
+                    <th>Observaciones</th>
+                    <th>Fecha Registro</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if maquinarias %}
+                    {% for maquinaria in maquinarias %}
+                    <tr>
+                        <td>{{ maquinaria.id_maquinaria }}</td>
+                        <td><strong>{{ maquinaria.nombre_codigo }}</strong></td>
+                        <td>{{ maquinaria.tipo }}</td>
+                        <td>{{ maquinaria.marca or 'N/A' }}</td>
+                        <td>{{ maquinaria.modelo or 'N/A' }}</td>
+                        <td>{{ maquinaria.area or 'No asignada' }}</td>
+                        <td>
+                            <span class="status-badge {{ maquinaria.estado | lower | replace(' ', '-') }}">
+                                {{ maquinaria.estado }}
+                            </span>
+                        </td>
+                        <td>{{ maquinaria.observaciones or 'Sin observaciones' }}</td>
+                        <td>{{ maquinaria.fecha_registro }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr class="empty-row">
+                        <td colspan="9">No hay maquinarias registradas en el sistema.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% endblock %}
