@@ -73,3 +73,18 @@ VALUES (
     'Activo',
     'Acceso principal'
 );
+
+CREATE TABLE IF NOT EXISTS actividad_maquinaria (
+    id_actividad INT AUTO_INCREMENT PRIMARY KEY,
+    maquina VARCHAR(100) NOT NULL,
+    zona VARCHAR(100) NOT NULL,
+    combustible_inicial ENUM('100%', '75%', '50%', '25%') NOT NULL,
+    horas_estimadas INT NOT NULL,
+    estado ENUM('EN RUTA', 'FINALIZADO', 'AVERIADO') DEFAULT 'EN RUTA',
+    combustible_final ENUM('100%', '75%', '50%', '25%', 'Reserva'),
+    horas_reales INT,
+    motivo_retraso TEXT,
+    observacion_falla TEXT,
+    fecha_inicio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_fin TIMESTAMP NULL DEFAULT NULL
+);

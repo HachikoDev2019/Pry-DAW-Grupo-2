@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Máquina en Uso{% endblock %}
+
+{% block content %}
+<section class="form-card">
+    <h1 style="margin-bottom: 10px;">Panel de Control: {{ actividad.maquina }}</h1>
+    <p style="text-align: center; color: #666; margin-bottom: 30px;">
+        Zona: {{ actividad.zona }} | Meta: {{ actividad.horas_estimadas }} horas
+    </p>
+
+    {% if actividad.estado == 'EN RUTA' %}
+    <form action="{{ url_for('guardar_checkout', id_actividad=actividad.id_actividad) }}" method="POST" style="margin-bottom: 40px; border: 1px solid #f8d7da; padding: 20px; border-radius: 8px; background: #fff3cd;">
+        <h3 style="color: #721c24; margin-bottom: 15px;">¿Ocurrió un incidente?</h3>
+        <input type="hidden" name="accion" value="averia">
+        <div class="form-row">
+            <label style="color: #721c24;">Falla (Obligatorio)</label>
+            <textarea name="observacion_falla" rows="2" placeholder="Ej: Falla motor, pinchazo..." required></textarea>
+        </div>
+        <button type="submit" class="btn-submit" style="background-color: #dc3545; margin-top: 10px;">
+            Reportar Avería
+        </button>
+    </form>
+
+    <hr style="border-top: 1px solid #ddd; margin-bottom: 30px;">
+
+    <form action="{{ url_for('guardar_checkout', id_actividad=actividad.id_actividad) }}" method="POST">
+        <h2 style="text-align: center; margin-bottom: 20px;">Finalizar Jornada</h2>
+        <input type="hidden" name="accion" value="finalizar">
+        
+        <div class="form-row">
+            <label>Combustible Final</label>
+            <select name="combustible_final" required>
+                <option value="75%">75%</option>
+                <option value="50%">50%</option>
+                <option value="25%">25%</option>
+                <option value="Reserva">Reserva (¡Alerta!)</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Horas Reales</label>
+            <input type="number" name="horas_reales" required min="1" max="24" placeholder="Ej: 9">
+        </div>
+
+        <div class="form-row">
+            <label>Motivo Retraso</label>
+            <textarea name="motivo_retraso" rows="2" placeholder="Llenar solo si se pasó de la hora estimada..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" style="background-color: #5b7fb1;">
+            Finalizar y Liberar
+        </button>
+    </form>
+    {% else %}
+        <div class="alert {{ 'error' if actividad.estado == 'AVERIADO' else 'success' }}" style="text-align: center;">
+            Esta actividad ya fue cerrada con estado: <strong>{{ actividad.estado }}</strong>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{{ url_for('actividad_maquinaria') }}" class="btn-primary">Volver al listado</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from maquinariaAD import clsMaquinaria, insertar_maquinaria, listar_maquinarias
 from solicitudAD import (clsSolicitud, insertar_solicitud, listar_mis_solicitudes, listar_todas_solicitudes, actualizar_solicitud)
 from personalAD import clsPersonal, insertar_personal, verificar_credenciales
+from actividadAD import clsActividad, iniciar_actividad, listar_actividades_activas, obtener_actividad, finalizar_actividad
+
 from bd import obtener_conexion
 
 
@@ -202,6 +204,87 @@ def logout():
     session.clear()
     flash("Sesión cerrada correctamente.", "success")
     return redirect(url_for('login'))
+
+# RUTAS: ACTIVIDAD MAQUINARIA (NUEVO MÓDULO)
+# ==========================================
+
+
+@app.route("/actividad_maquinaria")
+def actividad_maquinaria():
+    # Lista general de actividades (Panel de Monitoreo)
+    actividades = listar_actividades_activas()
+    return render_template("actividad/listado.html", actividades=actividades)
+
+
+@app.route("/actividad/checkin")
+def checkin_actividad():
+    # Muestra el formulario para iniciar jornada
+    return render_template("actividad/checkin.html")
+
+
+@app.route("/guardar_checkin", methods=["POST"])
+def guardar_checkin():
+    # Guarda el inicio de jornada y redirige al panel de la máquina
+    try:
+        actividad = clsActividad(
+            request.form["maquina"],
+            request.form["zona"],
+            request.form["combustible_inicial"],
+            request.form["horas_estimadas"]
+        )
+        id_viaje = iniciar_actividad(actividad)
+        
+        if id_viaje:
+            flash("Jornada iniciada correctamente.", "success")
+            return redirect(url_for("monitoreo_activo", id_actividad=id_viaje))
+        
+        flash("Error al iniciar la jornada.", "error")
+        return redirect(url_for("checkin_actividad"))
+        
+    except Exception as e:
+        flash(f"Error inesperado: {repr(e)}", "error")
+        return redirect(url_for("checkin_actividad"))
+
+
+@app.route("/actividad/activo/<int:id_actividad>")
+def monitoreo_activo(id_actividad):
+    # Muestra el panel activo de una máquina específica (para hacer Checkout o SOS)
+    actividad = obtener_actividad(id_actividad)
+    if actividad:
+        return render_template("actividad/checkout.html", actividad=actividad)
+    
+    flash("Actividad no encontrada.", "error")
+    return redirect(url_for("actividad_maquinaria"))
+
+
+@app.route("/guardar_checkout/<int:id_actividad>", methods=["POST"])
+def guardar_checkout(id_actividad):
+    # Procesa el Fin de Jornada o el reporte de Avería
+    try:
+        accion = request.form.get("accion")
+        
+        if accion == "averia":
+            estado = "AVERIADO"
+            falla = request.form.get("observacion_falla", "")
+            finalizar_actividad(id_actividad, None, None, None, estado, falla)
+            flash("Alerta de avería registrada. Logística notificada.", "error")
+        else:
+            estado = "FINALIZADO"
+            c_final = request.form["combustible_final"]
+            h_reales = request.form["horas_reales"]
+            motivo = request.form.get("motivo_retraso", "")
+            finalizar_actividad(id_actividad, c_final, h_reales, motivo, estado, None)
+            flash("Jornada finalizada y máquina liberada correctamente.", "success")
+            
+        return redirect(url_for("actividad_maquinaria"))
+        
+    except Exception as e:
+        flash(f"Error inesperado: {repr(e)}", "error")
+        return redirect(url_for("actividad_maquinaria"))
+
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

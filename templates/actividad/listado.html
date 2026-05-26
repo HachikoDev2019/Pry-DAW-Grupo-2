@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Actividad Maquinaria{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Monitoreo de Actividad</h1>
+    <p>Supervisión en tiempo real de maquinarias en campo.</p>
+</section>
+
+<section class="content-card">
+    <div class="section-actions">
+        <h2>Listado de Actividades</h2>
+        <a href="/actividad/checkin" style="background-color: #5b7fb1; color: #ffffff; padding: 10px 18px; border-radius: 5px; font-weight: 700; text-decoration: none; display: inline-block; cursor: pointer;">
+            + Iniciar Jornada (Check-In)
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Máquina</th>
+                    <th>Zona</th>
+                    <th>Estado</th>
+                    <th>Inicio</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if actividades %}
+                    {% for act in actividades %}
+                    <tr>
+                        <td>{{ act.id_actividad }}</td>
+                        <td><strong>{{ act.maquina }}</strong></td>
+                        <td>{{ act.zona }}</td>
+                        <td>
+                            <span class="status-badge 
+                                {% if act.estado == 'EN RUTA' %}status-en-revisión
+                                {% elif act.estado == 'FINALIZADO' %}status-aprobado
+                                {% else %}status-rechazado{% endif %}">
+                                {{ act.estado }}
+                            </span>
+                        </td>
+                        <td>{{ act.fecha_inicio }}</td>
+                        <td>
+                            <a href="{{ url_for('monitoreo_activo', id_actividad=act.id_actividad) }}" class="btn-small">
+                                Ver Panel
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr class="empty-row">
+                        <td colspan="6">No hay actividades registradas en este momento.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

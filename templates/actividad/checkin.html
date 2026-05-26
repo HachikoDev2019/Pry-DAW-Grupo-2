@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Check-In Maquinaria{% endblock %}
+
+{% block content %}
+<section class="form-card">
+    <h1>Inicio de Jornada (Check-In)</h1>
+
+    <form action="{{ url_for('guardar_checkin') }}" method="POST">
+        <div class="form-row">
+            <label>Máquina</label>
+            <select name="maquina" required>
+                <option value="">Seleccione...</option>
+                <option value="Tractor 1 (ABC-123)">Tractor 1 (ABC-123)</option>
+                <option value="Cosechadora CAT (DEF-456)">Cosechadora CAT (DEF-456)</option>
+                <option value="Camión B (GHI-789)">Camión B (GHI-789)</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Zona Asignada</label>
+            <select name="zona" required>
+                <option value="">Seleccione zona...</option>
+                <option value="Anexo Pampagrande">Anexo Pampagrande</option>
+                <option value="Anexo Saltur">Anexo Saltur</option>
+                <option value="Sipán Lote 4">Sipán Lote 4</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Combustible Inicial</label>
+            <select name="combustible_inicial" required>
+                <option value="100%">100% (Tanque Lleno)</option>
+                <option value="75%">75%</option>
+                <option value="50%">50%</option>
+                <option value="25%">25%</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Horas Estimadas</label>
+            <input type="number" name="horas_estimadas" required min="1" max="24" placeholder="Ej: 8">
+        </div>
+
+        <button type="submit" class="btn-submit" style="background-color: black;">
+            Iniciar Jornada
+        </button>
+    </form>
+</section>
+{% endblock %}

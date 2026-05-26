@@ -44,6 +44,12 @@
                     </a>
                 </li>
                 <li>
+                   <a class="{% if request.path.startswith('/actividad') %}active{% endif %}"
+                     href="{{ url_for('actividad_maquinaria') }}">
+                      Actividad Maquinaria
+                    </a>
+                </li>
+                <li>
                     <a class="{% if request.path == '/registrar_solicitud' %}active{% endif %}"
                         href="{{ url_for('registrar_solicitud') }}">
                         Registrar Solicitud
