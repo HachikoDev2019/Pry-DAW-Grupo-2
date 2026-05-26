@@ -174,37 +174,53 @@ def registro():
  
 @app.route("/guardar_personal", methods=["POST"])
 def guardar_personal():
+    # ── Validaciones backend ──────────────────────────
+    dni           = request.form.get("dni", "").strip()
+    nombres       = request.form.get("nombres", "").strip()
+    apellidos     = request.form.get("apellidos", "").strip()
+    telefono      = request.form.get("telefono", "").strip()
+    correo        = request.form.get("correo", "").strip()
+    tipo_usuario  = request.form.get("tipo_usuario", "").strip()
+    area          = request.form.get("area", "").strip()
+    puesto        = request.form.get("puesto", "").strip()
+    fecha_ingreso = request.form.get("fecha_ingreso", "").strip()
+    password      = request.form.get("password", "")
+    password2     = request.form.get("password2", "")
+ 
+    if not all([dni, nombres, apellidos, tipo_usuario, area, puesto, fecha_ingreso, password]):
+        flash("Completa todos los campos obligatorios.", "error")
+        return redirect(url_for("registro"))
+ 
+    if len(dni) != 8 or not dni.isdigit():
+        flash("El DNI debe tener exactamente 8 dígitos.", "error")
+        return redirect(url_for("registro"))
+ 
+    if len(password) < 6:
+        flash("La contraseña debe tener al menos 6 caracteres.", "error")
+        return redirect(url_for("registro"))
+ 
+    if password != password2:
+        flash("Las contraseñas no coinciden.", "error")
+        return redirect(url_for("registro"))
+ 
+    # ── Guardar ───────────────────────────────────────
     try:
         personal = clsPersonal(
-            request.form["dni"].strip(),
-            request.form["nombres"].strip(),
-            request.form["apellidos"].strip(),
-            request.form["telefono"].strip(),
-            request.form["correo"].strip(),
-            request.form["password"].strip(),
-            request.form["tipo_usuario"],
-            request.form["area"],
-            request.form["puesto"],
-            request.form["fecha_ingreso"]
+            dni, nombres, apellidos, telefono, correo,
+            tipo_usuario, area, puesto, fecha_ingreso, password
         )
  
         if insertar_personal(personal):
-            flash("Cuenta creada correctamente.", "success")
+            flash("Cuenta creada correctamente. Ya puedes iniciar sesión.", "success")
             return redirect(url_for("registro"))
  
-        flash("Error al crear la cuenta.", "error")
+        flash("Error al crear la cuenta. Verifica que el DNI no esté registrado.", "error")
         return redirect(url_for("registro"))
  
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("registro"))
-
-@app.route("/logout", methods=["POST"])
-def logout():
-    session.clear()
-    flash("Sesión cerrada correctamente.", "success")
-    return redirect(url_for('login'))
-
+ 
 # RUTAS: ACTIVIDAD MAQUINARIA (NUEVO MÓDULO)
 # ==========================================
 
