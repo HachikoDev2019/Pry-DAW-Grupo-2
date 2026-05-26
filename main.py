@@ -1,14 +1,48 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from maquinariaAD import clsMaquinaria, insertar_maquinaria
 from solicitudAD import (clsSolicitud, insertar_solicitud, listar_mis_solicitudes, listar_todas_solicitudes, actualizar_solicitud)
-from personalAD import clsPersonal, insertar_personal
+from personalAD import clsPersonal, insertar_personal, verificar_credenciales
+from bd import obtener_conexion
+import mysql.connector
 
 app = Flask(__name__)
 app.secret_key = "pomalca_secret_key"
 
+@app.route("/", methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        dni_ingresado = request.form.get('dni', '').strip()
+        password_ingresada = request.form.get('password', '').strip()
 
-@app.route("/")
+        trabajador = verificar_credenciales(dni_ingresado, password_ingresada)
+
+        if trabajador:
+    
+            session['id_personal'] = trabajador['id_personal']
+            session['nombres'] = trabajador['nombres']
+            session['apellidos'] = trabajador['apellidos']
+            session['tipo_usuario'] = trabajador['tipo_usuario']
+            
+            flash(f"¡Bienvenido, {trabajador['nombres']}!", "success")
+            return redirect(url_for('dashboard'))
+        else:
+            flash("Número de DNI o contraseña incorrectos, o usuario inactivo.", "error")
+            return redirect(url_for('login'))
+
+    return render_template("login.html")
+
+
+@app.route("/dashboard")
 def dashboard():
+    if 'id_personal' not in session:
+        flash("Por favor, inicie sesión para acceder al portal.", "error")
+        return redirect(url_for('login'))
+        
+    return render_template("dashboard.html")
+
+
+@app.route("/registro_persona")
+def registropersona():
     return render_template("registro.html")
 
 
@@ -122,11 +156,12 @@ def registro():
 def guardar_personal():
     try:
         personal = clsPersonal(
-            request.form["dni"],
-            request.form["nombres"],
-            request.form["apellidos"],
-            request.form["telefono"],
-            request.form["correo"],
+            request.form["dni"].strip(),
+            request.form["nombres"].strip(),
+            request.form["apellidos"].strip(),
+            request.form["telefono"].strip(),
+            request.form["correo"].strip(),
+            request.form["password"].strip(),
             request.form["tipo_usuario"],
             request.form["area"],
             request.form["puesto"],

@@ -4,348 +4,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pomalca – Crear Cuenta</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-        :root {
-            --primary:    #5b7fb1;
-            --primary-dk: #3d5a82;
-            --primary-lt: #eef3fb;
-            --accent:     #e74c3c;
-            --bg:         #f0f4f9;
-            --white:      #ffffff;
-            --border:     #dce3ed;
-            --text:       #1e2a3a;
-            --muted:      #7a8fa6;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 32px 16px;
-            background-image:
-                radial-gradient(ellipse at 20% 50%, rgba(91,127,177,0.10) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(91,127,177,0.07) 0%, transparent 50%);
-        }
-
-        .card {
-            width: 100%;
-            max-width: 520px;
-            background: var(--white);
-            border-radius: 20px;
-            box-shadow: 0 8px 40px rgba(30,42,58,0.10), 0 1px 2px rgba(30,42,58,0.05);
-            padding: 44px 48px 40px;
-            animation: slideUp 0.4s cubic-bezier(0.22,1,0.36,1);
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 28px;
-        }
-
-        .brand-logo {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--primary);
-            border: 2.5px solid var(--primary);
-            padding: 5px 14px;
-            border-radius: 7px;
-            letter-spacing: 1px;
-        }
-
-        .card-title {
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--text);
-            text-align: center;
-            margin-bottom: 6px;
-        }
-
-        .card-desc {
-            font-size: 13.5px;
-            color: var(--muted);
-            text-align: center;
-            margin-bottom: 32px;
-            line-height: 1.5;
-        }
-
-        /* Flash messages */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 13.5px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .alert.success { background: #d4edda; color: #155724; }
-        .alert.error   { background: #f8d7da; color: #721c24; }
-
-        .section-label {
-            font-size: 10.5px;
-            font-weight: 700;
-            letter-spacing: 1.8px;
-            text-transform: uppercase;
-            color: var(--primary);
-            margin: 22px 0 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-label::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--primary-lt);
-        }
-
-        .row-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        .full { grid-column: 1 / -1; }
-
-        .fg {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .fg label {
-            font-size: 11.5px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            color: #4a5e75;
-        }
-
-        .fg label .req { color: var(--accent); margin-left: 2px; }
-
-        .fg input,
-        .fg select,
-        .fg textarea {
-            width: 100%;
-            padding: 11px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 14px;
-            color: var(--text);
-            background: var(--white);
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .fg input::placeholder,
-        .fg textarea::placeholder { color: #b2bec3; }
-
-        .fg input:focus,
-        .fg select:focus,
-        .fg textarea:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3.5px rgba(91,127,177,0.13);
-        }
-
-        .fg select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6'%3E%3Cpath d='M1 1l4.5 4L10 1' stroke='%235b7fb1' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 13px center;
-            padding-right: 34px;
-            cursor: pointer;
-        }
-
-        .fg textarea {
-            resize: vertical;
-            min-height: 78px;
-            line-height: 1.5;
-        }
-
-        .input-wrap { position: relative; }
-        .input-prefix {
-            position: absolute;
-            left: 13px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--muted);
-            pointer-events: none;
-        }
-        .input-wrap input { padding-left: 34px; }
-
-        .hint {
-            font-size: 11px;
-            color: var(--muted);
-        }
-
-        .btn-submit {
-            width: 100%;
-            margin-top: 26px;
-            padding: 14px;
-            background: var(--primary);
-            color: var(--white);
-            border: none;
-            border-radius: 9px;
-            font-family: inherit;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-            box-shadow: 0 4px 14px rgba(91,127,177,0.35);
-        }
-
-        .btn-submit:hover {
-            background: var(--primary-dk);
-            transform: translateY(-1px);
-            box-shadow: 0 7px 20px rgba(91,127,177,0.38);
-        }
-
-        .btn-submit:active { transform: translateY(0); }
-
-        .foot {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 13.5px;
-            color: var(--muted);
-        }
-
-        .foot a {
-            color: var(--primary);
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        .foot a:hover { text-decoration: underline; }
-
-        @media (max-width: 560px) {
-            .card { padding: 32px 22px 28px; }
-            .row-2 { grid-template-columns: 1fr; }
-            .full { grid-column: auto; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"> 
 </head>
-<body>
+<body class="login-body">
 
-<div class="card">
+    <div class="login-card" style="max-width: 560px;">
 
-    <div class="brand">
-        <div class="brand-logo">Pomalca</div>
-    </div>
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div class="logo-login">Pomalca</div>
+            <h1 style="font-size: 22px; font-weight: 800; margin-bottom: 6px; color: #1e2a3a;">Crear cuenta</h1>
+            <p style="font-size: 13.5px; color: #7a8fa6;">Completa los datos para registrarte en el sistema.</p>
+        </div>
 
-    <h1 class="card-title">Crear cuenta</h1>
-    <p class="card-desc">Completa los datos para registrarte en el sistema.</p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert {{ category }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-    {% endwith %}
+        <form action="{{ url_for('guardar_personal') }}" method="POST">
 
-    <form action="{{ url_for('guardar_personal') }}" method="POST">
+            <div class="form-section-title">Datos personales</div>
 
-        <div class="section-label">Datos personales</div>
-
-        <div class="row-2">
-            <div class="fg">
-                <label for="dni">DNI <span class="req">*</span></label>
-                <div class="input-wrap">
-                    <span class="input-prefix">#</span>
-                    <input type="text" id="dni" name="dni"
-                           placeholder="12345678" maxlength="8"
-                           inputmode="numeric" required
-                           oninput="this.value=this.value.replace(/\D/g,'')">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+                
+                <div class="form-group-vertical">
+                    <label for="dni">DNI <span class="req-mark">*</span></label>
+                    <div class="input-wrap">
+                        <span class="input-prefix">#</span>
+                        <input type="text" id="dni" name="dni"
+                               placeholder="12345678" maxlength="8"
+                               inputmode="numeric" required
+                               oninput="this.value=this.value.replace(/\D/g,'')">
+                    </div>
+                    <span style="font-size: 11px; color: #7a8fa6; margin-top: 4px; display: block;">8 dígitos numéricos</span>
                 </div>
-                <span class="hint">8 dígitos numéricos</span>
+
+                <div class="form-group-vertical">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono"
+                           placeholder="987 654 321" maxlength="15">
+                </div>
+
+                <div class="form-group-vertical">
+                    <label for="nombres">Nombres <span class="req-mark">*</span></label>
+                    <input type="text" id="nombres" name="nombres"
+                           placeholder="Ej. Juan Carlos" maxlength="100" required>
+                </div>
+
+                <div class="form-group-vertical">
+                    <label for="apellidos">Apellidos <span class="req-mark">*</span></label>
+                    <input type="text" id="apellidos" name="apellidos"
+                           placeholder="Ej. García Pérez" maxlength="100" required>
+                </div>
+
+                <div class="form-group-vertical" style="grid-column: 1 / -1;">
+                    <label for="correo">Correo electrónico</label>
+                    <input type="email" id="correo" name="correo"
+                           placeholder="correo@pomalca.com" maxlength="100">
+                </div>
             </div>
 
-            <div class="fg">
-                <label for="telefono">Teléfono</label>
-                <input type="tel" id="telefono" name="telefono"
-                       placeholder="987 654 321" maxlength="15">
+            <div class="form-section-title" style="margin-top: 10px;">Cargo y acceso</div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+                <div class="form-group-vertical">
+                    <label for="tipo_usuario">Tipo de usuario <span class="req-mark">*</span></label>
+                    <select id="tipo_usuario" name="tipo_usuario" required>
+                        <option value="" disabled selected>— Seleccionar —</option>
+                        <option value="Administrador">Administrador</option>
+                        <option value="Trabajador">Trabajador</option>
+                    </select>
+                </div>
+
+                <div class="form-group-vertical">
+                    <label for="area">Área <span class="req-mark">*</span></label>
+                    <select id="area" name="area" required>
+                        <option value="" disabled selected>— Seleccionar —</option>
+                        <option value="Campo">Campo</option>
+                        <option value="Fábrica">Fábrica</option>
+                        <option value="Logística">Logística</option>
+                        <option value="Mantenimiento">Mantenimiento</option>
+                        <option value="Administración">Administración</option>
+                        <option value="Recursos Humanos">Recursos Humanos</option>
+                        <option value="Sistemas">Sistemas</option>
+                    </select>
+                </div>
+
+                <div class="form-group-vertical">
+                    <label for="puesto">Puesto <span class="req-mark">*</span></label>
+                    <input type="text" id="puesto" name="puesto"
+                           placeholder="Ej. Operador de Campo" maxlength="100" required>
+                </div>
+
+                <div class="form-group-vertical">
+                    <label for="fecha_ingreso">Fecha de ingreso <span class="req-mark">*</span></label>
+                    <input type="date" id="fecha_ingreso" name="fecha_ingreso" required style="padding: 9.5px 14px;">
+                </div>
+
+                <div class="form-group-vertical" style="grid-column: 1 / -1; margin-top: 4px;">
+                    <label for="password">Contraseña del Sistema <span class="req-mark">*</span></label>
+                    <input type="password" id="password" name="password" 
+                           placeholder="Crea una contraseña segura" required maxlength="255">
+                    <span style="font-size: 11px; color: #7a8fa6; margin-top: -2px;">Se usará para iniciar sesión junto a tu DNI.</span>
+                </div>
             </div>
 
-            <div class="fg">
-                <label for="nombres">Nombres <span class="req">*</span></label>
-                <input type="text" id="nombres" name="nombres"
-                       placeholder="Ej. Juan Carlos" maxlength="100" required>
-            </div>
+            <button type="submit" class="btn-submit-block" style="margin-top: 20px;">
+                Registrarme
+            </button>
+        </form>
 
-            <div class="fg">
-                <label for="apellidos">Apellidos <span class="req">*</span></label>
-                <input type="text" id="apellidos" name="apellidos"
-                       placeholder="Ej. García Pérez" maxlength="100" required>
-            </div>
-
-            <div class="fg full">
-                <label for="correo">Correo electrónico</label>
-                <input type="email" id="correo" name="correo"
-                       placeholder="correo@pomalca.com" maxlength="100">
-            </div>
+        <div style="text-align: center; margin-top: 26px; font-size: 13.5px;">
+            <p style="color: #7a8fa6;">
+                ¿Ya tienes cuenta? 
+                <a href="{{ url_for('dashboard') }}" style="color: #5b7fb1; font-weight: 700; text-decoration: none;">Iniciar sesión</a>
+            </p>
         </div>
 
-        <div class="section-label">Cargo y acceso</div>
-
-        <div class="row-2">
-            <div class="fg">
-                <label for="tipo_usuario">Tipo de usuario <span class="req">*</span></label>
-                <select id="tipo_usuario" name="tipo_usuario" required>
-                    <option value="" disabled selected>— Seleccionar —</option>
-                    <option value="Administrador">Administrador</option>
-                    <option value="Trabajador">Trabajador</option>
-                </select>
-            </div>
-
-            <div class="fg">
-                <label for="area">Área <span class="req">*</span></label>
-                <select id="area" name="area" required>
-                    <option value="" disabled selected>— Seleccionar —</option>
-                    <option value="Campo">Campo</option>
-                    <option value="Fábrica">Fábrica</option>
-                    <option value="Logística">Logística</option>
-                    <option value="Mantenimiento">Mantenimiento</option>
-                    <option value="Administración">Administración</option>
-                    <option value="Recursos Humanos">Recursos Humanos</option>
-                    <option value="Sistemas">Sistemas</option>
-                </select>
-            </div>
-
-            <div class="fg">
-                <label for="puesto">Puesto <span class="req">*</span></label>
-                <input type="text" id="puesto" name="puesto"
-                       placeholder="Ej. Operador de Campo" maxlength="100" required>
-            </div>
-
-            <div class="fg">
-                <label for="fecha_ingreso">Fecha de ingreso <span class="req">*</span></label>
-                <input type="date" id="fecha_ingreso" name="fecha_ingreso" required>
-            </div>
-        </div>
-
-        <button type="submit" class="btn-submit">Registrarme</button>
-    </form>
-
-    <p class="foot">¿Ya tienes cuenta? <a href="{{ url_for('dashboard') }}">Iniciar sesión</a></p>
-
-</div>
+    </div>
 
 </body>
 </html>

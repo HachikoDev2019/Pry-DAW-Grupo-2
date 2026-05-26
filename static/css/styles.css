@@ -1,3 +1,9 @@
+/* ==========================================================================
+   1. FUENTES (SIEMPRE DEBE IR EN LA PRIMERA LÍNEA DEL ARCHIVO)
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* Tu estilo original inicial */
 * {
     margin: 0;
     padding: 0;
@@ -17,15 +23,12 @@ body {
     top: 0;
     left: 0;
     right: 0;
-
     height: 70px;
     background: #ffffff;
     border-bottom: 2px solid #dcdde1;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     padding: 0 22px;
     z-index: 1000;
 }
@@ -35,7 +38,6 @@ body {
     border: 2px solid #5b7fb1;
     padding: 8px 18px;
     border-radius: 5px;
-
     font-size: 25px;
     font-weight: 800;
 }
@@ -81,12 +83,10 @@ body {
 .sidebar a {
     display: block;
     padding: 18px 24px;
-
     color: #3d3d3d;
     font-size: 15px;
     font-weight: 600;
     text-decoration: none;
-
     border-bottom: 1px solid #eeeeee;
     border-left: 4px solid transparent;
 }
@@ -201,7 +201,6 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     margin-bottom: 12px;
 }
 
@@ -216,9 +215,7 @@ body {
     color: #ffffff;
     border: none;
     border-radius: 5px;
-
     padding: 10px 18px;
-
     font-weight: 700;
     cursor: pointer;
 }
@@ -232,9 +229,7 @@ body {
     color: #555555;
     border: 1px solid #cccccc;
     border-radius: 5px;
-
     padding: 10px 18px;
-
     font-weight: 700;
     cursor: pointer;
 }
@@ -254,7 +249,6 @@ table {
 thead th {
     padding: 14px;
     background: #f7f8fa;
-
     color: #555555;
     font-size: 12px;
     text-align: left;
@@ -288,17 +282,9 @@ tbody td {
     margin-right: 5px;
 }
 
-.campo {
-    background: #5b7fb1;
-}
-
-.planta {
-    background: #222222;
-}
-
-.logistica {
-    background: #888888;
-}
+.campo { background: #5b7fb1; }
+.planta { background: #222222; }
+.logistica { background: #888888; }
 
 /* MODAL */
 
@@ -306,10 +292,8 @@ tbody td {
     display: none;
     position: fixed;
     inset: 0;
-
     background: rgba(0, 0, 0, 0.45);
     z-index: 2000;
-
     align-items: center;
     justify-content: center;
 }
@@ -321,11 +305,9 @@ tbody td {
 .modal {
     width: 560px;
     max-width: 95vw;
-
     background: #ffffff;
     border-radius: 10px;
     padding: 28px;
-
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
 }
 
@@ -333,7 +315,6 @@ tbody td {
     font-size: 18px;
     margin-bottom: 20px;
     padding-bottom: 10px;
-
     border-bottom: 2px solid #5b7fb1;
 }
 
@@ -366,7 +347,6 @@ tbody td {
     padding: 10px;
     border: 1px solid #cccccc;
     border-radius: 5px;
-
     font-family: inherit;
     font-size: 14px;
 }
@@ -380,10 +360,8 @@ tbody td {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-
     margin-top: 22px;
     padding-top: 16px;
-
     border-top: 1px solid #eeeeee;
 }
 
@@ -391,38 +369,27 @@ tbody td {
     position: fixed;
     top: 82px;
     right: 22px;
-
     background: #155724;
     color: #ffffff;
-
     padding: 12px 18px;
     border-radius: 6px;
-
     font-size: 13px;
     font-weight: 700;
-
     transform: translateX(130%);
     transition: transform 0.3s;
     z-index: 3000;
 }
 
-.notif.show {
-    transform: translateX(0);
-}
-
-.notif.error {
-    background: #721c24;
-}
+.notif.show { transform: translateX(0); }
+.notif.error { background: #721c24; }
 
 /* FORMULARIO MAQUINARIA */
 
 .form-card {
     width: 100%;
     max-width: 760px;
-
     margin: 10px auto;
     padding: 46px;
-
     background: #ffffff;
     border-radius: 10px;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
@@ -439,7 +406,6 @@ tbody td {
     grid-template-columns: 170px 1fr;
     align-items: center;
     gap: 18px;
-
     margin-bottom: 18px;
 }
 
@@ -455,49 +421,37 @@ tbody td {
 .form-row textarea {
     width: 100%;
     padding: 12px;
-
     border: 1px solid #cccccc;
     border-radius: 5px;
-
     font-family: inherit;
     font-size: 15px;
 }
 
-.form-row textarea {
-    resize: vertical;
-}
+.form-row textarea { resize: vertical; }
 
 .btn-submit {
     display: block;
     width: 240px;
-
     margin: 34px auto 0;
     padding: 14px;
-
     background: #000000;
     color: #ffffff;
-
     border: none;
     border-radius: 5px;
-
     font-size: 15px;
     font-weight: 800;
-
     cursor: pointer;
 }
 
-.btn-submit:hover {
-    background: #333333;
-}
+.btn-submit:hover { background: #333333; }
+
 .filter-card {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
-
     background: #ffffff;
     border: 1px solid #dddddd;
     border-radius: 8px;
-
     padding: 18px;
     margin-bottom: 24px;
 }
@@ -540,9 +494,7 @@ tbody td {
     cursor: pointer;
 }
 
-.btn-small:hover {
-    background: #3d5a82;
-}
+.btn-small:hover { background: #3d5a82; }
 
 .status-badge {
     display: inline-block;
@@ -552,22 +504,160 @@ tbody td {
     font-weight: 800;
 }
 
-.status-pendiente {
-    background: #f0f0f0;
-    color: #555555;
+.status-pendiente   { background: #f0f0f0; color: #555555; }
+.status-en-revisión { background: #fff3cd; color: #856404; }
+.status-aprobado    { background: #d4edda; color: #155724; }
+.status-rechazado   { background: #f8d7da; color: #721c24; }
+
+
+/* ==========================================================================
+   2. NUEVOS ESTILOS PARA LOGIN Y REGISTRO (PEGADOS AL FINAL)
+   ========================================================================== */
+
+body.login-body, body:has(.card) {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #f0f4f9;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(91,127,177,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(91,127,177,0.07) 0%, transparent 50%);
 }
 
-.status-en-revisión {
-    background: #fff3cd;
-    color: #856404;
+.login-card {
+    width: 100%;
+    max-width: 440px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(30,42,58,0.10), 0 1px 2px rgba(30,42,58,0.05);
+    padding: 44px 48px 40px;
+    animation: loginSlideUp 0.4s cubic-bezier(0.22,1,0.36,1);
 }
 
-.status-aprobado {
-    background: #d4edda;
-    color: #155724;
+@keyframes loginSlideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-.status-rechazado {
-    background: #f8d7da;
-    color: #721c24;
+.logo-login {
+    display: inline-block;
+    color: #5b7fb1;
+    border: 2.5px solid #5b7fb1;
+    padding: 5px 14px;
+    border-radius: 7px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+.form-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.form-group-vertical label {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #4a5e75;
+}
+
+.form-group-vertical input,
+.form-group-vertical select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #dce3ed;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1e2a3a;
+    background: #ffffff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group-vertical input:focus,
+.form-group-vertical select:focus {
+    border-color: #5b7fb1;
+    box-shadow: 0 0 0 3.5px rgba(91,127,177,0.13);
+}
+
+.input-wrap { 
+    position: relative; 
+}
+
+.input-prefix {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    font-weight: 700;
+    color: #7a8fa6;
+    pointer-events: none;
+}
+
+.input-wrap input { 
+    padding-left: 34px; 
+}
+
+.btn-submit-block {
+    display: block;
+    width: 100%;
+    margin-top: 26px;
+    padding: 14px;
+    background: #5b7fb1;
+    color: #ffffff;
+    border: none;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(91,127,177,0.35);
+}
+
+.btn-submit-block:hover {
+    background: #3d5a82;
+    transform: translateY(-1px);
+    box-shadow: 0 7px 20px rgba(91,127,177,0.38);
+}
+
+.btn-submit-block:active { 
+    transform: translateY(0); 
+}
+
+@media (max-width: 480px) {
+    .login-card { padding: 36px 24px 32px; }
+}
+
+.form-section-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #5b7fb1;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 24px 0 12px;
+    border-bottom: 1px solid #eeeeee;
+    padding-bottom: 6px;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+}
+
+.req-mark {
+    color: #e74c3c;
+    font-weight: bold;
+    margin-left: 2px;
 }
