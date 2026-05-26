@@ -1,4 +1,3 @@
-
 from bd import obtener_conexion
 import pymysql.cursors
  
@@ -103,4 +102,51 @@ def verificar_credenciales(dni, password):
  
     except Exception as err:
         print(f"Error crítico en verificar_credenciales: {err}")
+        return None
+
+
+def listar_personal():
+    try:
+        conn = obtener_conexion()
+        if conn is None:
+            return []
+        with conn:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT id_personal, dni, nombres, apellidos,
+                           telefono, correo, tipo_usuario,
+                           area, puesto, fecha_ingreso, estado
+                    FROM personal
+                    ORDER BY id_personal ASC
+                """)
+                registros = cursor.fetchall()
+        for r in registros:
+            if r['fecha_ingreso']:
+                r['fecha_ingreso'] = str(r['fecha_ingreso'])
+        return registros
+    except Exception as e:
+        print("Error en listar_personal:", repr(e))
+        return []
+
+
+def leer_personal_xDNI(dni):
+    try:
+        conn = obtener_conexion()
+        if conn is None:
+            return None
+        with conn:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT id_personal, dni, nombres, apellidos,
+                           telefono, correo, tipo_usuario,
+                           area, puesto, fecha_ingreso, estado
+                    FROM personal
+                    WHERE TRIM(dni) = %s
+                """, (str(dni).strip(),))
+                registro = cursor.fetchone()
+        if registro and registro['fecha_ingreso']:
+            registro['fecha_ingreso'] = str(registro['fecha_ingreso'])
+        return registro
+    except Exception as e:
+        print("Error en leer_personal_xDNI:", repr(e))
         return None

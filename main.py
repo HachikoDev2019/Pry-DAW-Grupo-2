@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from maquinariaAD import clsMaquinaria, insertar_maquinaria, listar_maquinarias
 from solicitudAD import (clsSolicitud, insertar_solicitud, listar_mis_solicitudes, listar_todas_solicitudes, actualizar_solicitud)
-from personalAD import clsPersonal, insertar_personal, verificar_credenciales
+from personalAD import clsPersonal, insertar_personal, verificar_credenciales, listar_personal, leer_personal_xDNI
 from actividadAD import clsActividad, iniciar_actividad, listar_actividades_activas, obtener_actividad, finalizar_actividad
 
 from bd import obtener_conexion
@@ -179,7 +179,6 @@ def registro():
  
 @app.route("/guardar_personal", methods=["POST"])
 def guardar_personal():
-    # ── Validaciones backend ──────────────────────────
     dni           = request.form.get("dni", "").strip()
     nombres       = request.form.get("nombres", "").strip()
     apellidos     = request.form.get("apellidos", "").strip()
@@ -208,7 +207,6 @@ def guardar_personal():
         flash("Las contraseñas no coinciden.", "error")
         return redirect(url_for("registro"))
  
-    # ── Guardar ───────────────────────────────────────
     try:
         personal = clsPersonal(
             dni, nombres, apellidos, telefono, correo,
@@ -225,27 +223,71 @@ def guardar_personal():
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("registro"))
- 
-# RUTAS: ACTIVIDAD MAQUINARIA (NUEVO MÓDULO)
-# ==========================================
 
+
+# =============================================================
+# API PERSONAL
+# =============================================================
+
+@app.route("/api_listarpersonal")
+def api_listarpersonal():
+    try:
+        resultado = listar_personal()
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": repr(e)})
+
+
+@app.route("/api_buscarpersonal/<string:dni>")
+def api_buscarpersonal(dni):
+    try:
+        resultado = leer_personal_xDNI(dni)
+        if resultado:
+            return jsonify({"code": 1, "data": resultado, "message": "Personal encontrado."})
+        return jsonify({"code": 0, "data": {}, "message": f"No se encontró personal con DNI {dni}."})
+    except Exception as e:
+        return jsonify({"code": -1, "data": {}, "error": "Excepción superior: " + repr(e)})
+
+
+@app.route("/api_guardarpersonal", methods=['POST'])
+def api_guardarpersonal():
+    try:
+        objPersonal = clsPersonal(
+            request.json['dni'],
+            request.json['nombres'],
+            request.json['apellidos'],
+            request.json.get('telefono', ''),
+            request.json.get('correo', ''),
+            request.json['tipo_usuario'],
+            request.json['area'],
+            request.json['puesto'],
+            request.json['fecha_ingreso'],
+            request.json['password']
+        )
+        if insertar_personal(objPersonal):
+            return jsonify({"code": 1, "data": {}, "message": "Personal insertado correctamente."})
+        return jsonify({"code": 0, "data": {}, "error": "Error al insertar personal."})
+    except Exception as e:
+        return jsonify({"code": -1, "data": {}, "error": "Excepción superior: " + repr(e)})
+
+
+# =============================================================
+# ACTIVIDAD MAQUINARIA
+# =============================================================
 
 @app.route("/actividad_maquinaria")
 def actividad_maquinaria():
-    # Lista general de actividades (Panel de Monitoreo)
     actividades = listar_actividades_activas()
     return render_template("actividad/listado.html", actividades=actividades)
 
 
 @app.route("/actividad/checkin")
 def checkin_actividad():
-    # Muestra el formulario para iniciar jornada
     return render_template("actividad/checkin.html")
 
 
 @app.route("/guardar_checkin", methods=["POST"])
 def guardar_checkin():
-    # Guarda el inicio de jornada y redirige al panel de la máquina
     try:
         actividad = clsActividad(
             request.form["maquina"],
@@ -269,7 +311,6 @@ def guardar_checkin():
 
 @app.route("/actividad/activo/<int:id_actividad>")
 def monitoreo_activo(id_actividad):
-    # Muestra el panel activo de una máquina específica (para hacer Checkout o SOS)
     actividad = obtener_actividad(id_actividad)
     if actividad:
         return render_template("actividad/checkout.html", actividad=actividad)
@@ -280,7 +321,6 @@ def monitoreo_activo(id_actividad):
 
 @app.route("/guardar_checkout/<int:id_actividad>", methods=["POST"])
 def guardar_checkout(id_actividad):
-    # Procesa el Fin de Jornada o el reporte de Avería
     try:
         accion = request.form.get("accion")
         
@@ -302,9 +342,6 @@ def guardar_checkout(id_actividad):
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("actividad_maquinaria"))
-
-
-
 
 
 if __name__ == "__main__":
