@@ -18,8 +18,13 @@
         </div>
 
         <div class="user-info">
-            <strong>Admin</strong>
-            <span>Cerrar Sesión</span>
+            <strong>{{ session.get('nombres', 'Usuario') }}</strong>
+            <span style="font-size: 11px; color: #a0b0c0;">{{ session.get('tipo_usuario', '') }}</span>
+            <form action="{{ url_for('logout') }}" method="POST" style="display: inline;">
+              <button type="submit" class="button-out">
+               Cerrar Sesión
+              </button>
+            </form>
         </div>
     </header>
 
@@ -51,12 +56,14 @@
                         Mis Solicitudes
                     </a>
                 </li>
+                {% if session.get('tipo_usuario') == 'Administrador' %}
                 <li>
                     <a class="{% if request.path == '/gestion_solicitudes' %}active{% endif %}"
                         href="{{ url_for('gestion_solicitudes') }}">
                         Gestión de Solicitudes
                     </a>
                 </li>
+                {% endif %}
                 <li>
                     <a href="#">Requerimientos</a>
                 </li>

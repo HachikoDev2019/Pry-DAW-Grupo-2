@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-from maquinariaAD import clsMaquinaria, insertar_maquinaria
+from maquinariaAD import clsMaquinaria, insertar_maquinaria, listar_maquinarias
 from solicitudAD import (clsSolicitud, insertar_solicitud, listar_mis_solicitudes, listar_todas_solicitudes, actualizar_solicitud)
 from personalAD import clsPersonal, insertar_personal, verificar_credenciales
 from bd import obtener_conexion
-import mysql.connector
+
 
 app = Flask(__name__)
 app.secret_key = "pomalca_secret_key"
@@ -66,7 +66,7 @@ def guardar_maquinaria():
 
         if insertar_maquinaria(maquinaria):
             flash("Maquinaria registrada correctamente.", "success")
-            return redirect(url_for("registro_maquinaria"))
+            return redirect(url_for("mis_maquinarias"))
 
         flash("Error al registrar la maquinaria.", "error")
         return redirect(url_for("registro_maquinaria"))
@@ -74,6 +74,21 @@ def guardar_maquinaria():
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("registro_maquinaria"))
+    
+
+@app.route("/mis_maquinarias")
+def mis_maquinarias():
+    try:
+        maquinarias = listar_maquinarias()
+        return render_template(
+            "maquinaria/mis_maquinarias.html", 
+            maquinarias=maquinarias
+        )
+    except Exception as e:
+        flash(f"Error al cargar el inventario: {repr(e)}", "error")
+        return redirect(url_for("dashboard"))
+
+
     
 @app.route("/registrar_solicitud")
 def registrar_solicitud():
@@ -114,6 +129,9 @@ def mis_solicitudes():
 
 @app.route("/gestion_solicitudes")
 def gestion_solicitudes():
+    if session.get('tipo_usuario') != 'Administrador':
+        flash("No tienes permisos para acceder a esta sección.", "error")
+        return redirect(url_for('dashboard'))
     estado = request.args.get("estado")
     area = request.args.get("area")
     prioridad = request.args.get("prioridad")
@@ -179,6 +197,11 @@ def guardar_personal():
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("registro"))
 
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    flash("Sesión cerrada correctamente.", "success")
+    return redirect(url_for('login'))
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -43,3 +43,64 @@ def insertar_maquinaria(maquinaria):
     except Exception as e:
         print("Error al insertar maquinaria:", repr(e))
         return False
+
+
+
+def listar_maquinarias():
+    """Trae el listado completo de maquinarias ordenadas por fecha de registro."""
+    try:
+        conn = obtener_conexion()
+        if conn is None:
+            return []  # Corregido de False a [] para mantener consistencia con los retornos
+        with conn:
+            with conn.cursor() as cursor:
+                sql = """
+                    SELECT id_maquinaria, nombre_codigo, tipo, marca, modelo, area, estado, observaciones, fecha_registro
+                    FROM maquinaria
+                    ORDER BY fecha_registro DESC
+                """
+                cursor.execute(sql)
+                return cursor.fetchall()
+
+
+    except Exception as e:
+        print("Error al listar maquinarias:", repr(e))
+        return []
+
+
+
+
+def listar_maquinarias_filtradas(estado=None, area=None, tipo=None):
+    """Permite buscar maquinarias aplicando filtros dinámicos por estado, área o tipo."""
+    try:
+        conn = obtener_conexion()
+        if conn is None:
+            return []
+        with conn:
+            with conn.cursor() as cursor:
+                # El truco del WHERE 1 = 1 nos permite concatenar ANDs de forma limpia
+                sql = """
+                    SELECT id_maquinaria, nombre_codigo, tipo, marca, modelo, area, estado, observaciones, fecha_registro
+                    FROM maquinaria
+                    WHERE 1 = 1
+                """
+                params = []
+                
+                if estado:
+                    sql += " AND estado = %s"
+                    params.append(estado)
+                if area:
+                    sql += " AND area = %s"
+                    params.append(area)
+                if tipo:
+                    sql += " AND tipo = %s"
+                    params.append(tipo)
+                    
+                sql += " ORDER BY fecha_registro DESC"
+                
+                cursor.execute(sql, params)
+                return cursor.fetchall()
+                
+    except Exception as e:
+        print("Error al filtrar maquinarias:", repr(e))
+        return []

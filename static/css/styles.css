@@ -661,3 +661,14 @@ body.login-body, body:has(.card) {
     font-weight: bold;
     margin-left: 2px;
 }
+
+.button-out{
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-left: 10px;
+}
