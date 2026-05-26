@@ -42,6 +42,11 @@ def dashboard():
         
     return render_template("dashboard.html")
 
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    flash("Sesión cerrada correctamente.", "success")
+    return redirect(url_for("login"))
 
 @app.route("/registro_persona")
 def registropersona():
