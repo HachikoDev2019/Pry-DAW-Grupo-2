@@ -1,0 +1,41 @@
+[
+    {
+        "apellidos": "Principal",
+        "area": "Sistemas",
+        "correo": "admin@gmail.com",
+        "dni": "12345678",
+        "estado": "Activo",
+        "fecha_ingreso": "2026-05-26",
+        "id_personal": 1,
+        "nombres": "Admin",
+        "puesto": "Administrador",
+        "telefono": "999999999",
+        "tipo_usuario": "Administrador"
+    },
+    {
+        "apellidos": "Mera Chuque",
+        "area": "Fábrica",
+        "correo": "mera@hotmail.com",
+        "dni": "73078726",
+        "estado": "Activo",
+        "fecha_ingreso": "2026-05-05",
+        "id_personal": 2,
+        "nombres": "Edin",
+        "puesto": "Auxiliar",
+        "telefono": "955520125",
+        "tipo_usuario": "Administrador"
+    },
+    {
+        "apellidos": "López Torres",
+        "area": "Campo",
+        "correo": "maria@pomalca.com",
+        "dni": "87654321",
+        "estado": "Activo",
+        "fecha_ingreso": "2026-05-26",
+        "id_personal": 4,
+        "nombres": "María",
+        "puesto": "Técnico",
+        "telefono": "987123456",
+        "tipo_usuario": "Trabajador"
+    }
+]
