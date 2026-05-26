@@ -1,0 +1,11 @@
+de maquinaria
+
+{
+    "nombre_codigo": "BOM-001",
+    "tipo": "Bomba hidráulica",
+    "marca": "Bosch",
+    "modelo": "X200",
+    "area": "Producción",
+    "estado": "Operativo",
+    "observaciones": "Equipo nuevo instalado en línea 3"
+}
