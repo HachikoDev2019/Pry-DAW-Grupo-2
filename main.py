@@ -149,11 +149,11 @@ def guardar_personal():
             apellidos,
             telefono,
             correo,
-            password,
             tipo_usuario,
             area,
             puesto,
-            fecha_ingreso
+            fecha_ingreso,
+            password
         )
 
         if insertar_personal(personal):
@@ -184,7 +184,7 @@ def registro_maquinaria():
 
     return render_template("maquinaria/registro_maquinaria.html")
 
-@app.route("/api_listarmaquinarias", methods=['POST'])
+@app.route("/api_listarmaquinarias", methods=['GET'])
 def api_listarmaquinarias():
     try:
         resultado = listar_maquinarias()
@@ -574,11 +574,11 @@ def api_guardarpersonal():
             request.json["apellidos"],
             request.json.get("telefono", ""),
             request.json.get("correo", ""),
-            request.json["password"],
             request.json["tipo_usuario"],
             request.json["area"],
             request.json["puesto"],
-            request.json["fecha_ingreso"]
+            request.json["fecha_ingreso"],
+            request.json["password"]
         )
 
         if insertar_personal(obj_personal):
