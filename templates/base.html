@@ -20,8 +20,8 @@
         <div class="user-info">
             <strong>{{ session.get('nombres', 'Usuario') }}</strong>
             <span style="font-size: 11px; color: #a0b0c0;">{{ session.get('tipo_usuario', '') }}</span>
-            <form id="logoutForm" action="{{ url_for('logout') }}" method="POST" class="logout-form">
-                <button type="button" class="logout-btn" onclick="confirmarLogout()">
+            <form action="{{ url_for('logout') }}" method="POST" class="logout-form">
+                <button type="submit" class="logout-btn">
                     Cerrar sesión
                 </button>
             </form>
@@ -68,7 +68,30 @@
                 </li>
                 {% endif %}
 
-                {% if session.get('tipo_usuario') == 'Trabajador' %}
+                {% if session.get('tipo_usuario') == 'Supervisor' %}
+                <li>
+                    <a class="{% if request.path == '/gestion_solicitudes' %}active{% endif %}"
+                        href="{{ url_for('gestion_solicitudes') }}">
+                        Gestión de Solicitudes
+                    </a>
+                </li>
+
+                <li>
+                    <a class="{% if request.path == '/mis_maquinarias' or request.path == '/registro_maquinaria' %}active{% endif %}"
+                        href="{{ url_for('mis_maquinarias') }}">
+                        Maquinaria
+                    </a>
+                </li>
+
+                <li>
+                    <a class="{% if request.path.startswith('/actividad') %}active{% endif %}"
+                        href="{{ url_for('actividad_maquinaria') }}">
+                        Actividad Maquinaria
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if session.get('tipo_usuario') == 'Operario' %}
                 <li>
                     <a class="{% if request.path == '/registrar_solicitud' %}active{% endif %}"
                         href="{{ url_for('registrar_solicitud') }}">
@@ -80,6 +103,13 @@
                     <a class="{% if request.path == '/mis_solicitudes' %}active{% endif %}"
                         href="{{ url_for('mis_solicitudes') }}">
                         Mis Solicitudes
+                    </a>
+                </li>
+
+                <li>
+                    <a class="{% if request.path.startswith('/actividad') %}active{% endif %}"
+                        href="{{ url_for('actividad_maquinaria') }}">
+                        Actividad Maquinaria
                     </a>
                 </li>
                 {% endif %}
@@ -101,31 +131,7 @@
         </main>
     </div>
 
-    <!-- Modal de confirmación genérico -->
-    <div id="confirmModal">
-        <div class="modal-content">
-            <h2 id="modalTitle">Confirmar</h2>
-            <p id="modalMessage">¿Estás seguro?</p>
-            <div class="modal-buttons">
-                <button type="button" id="modalConfirm" class="btn-modal btn-confirm">Confirmar</button>
-                <button type="button" id="modalCancel" class="btn-modal btn-cancel">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
-    <script>
-        function confirmarLogout() {
-            openModal({
-                title: '¿Cerrar sesión?',
-                message: '¿Estás seguro que deseas cerrar sesión?',
-                onConfirm: () => {
-                    document.getElementById('logoutForm').submit();
-                }
-            });
-        }
-    </script>
 </body>
 
 </html>

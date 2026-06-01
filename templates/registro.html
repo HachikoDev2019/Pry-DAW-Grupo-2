@@ -142,8 +142,9 @@
                     <label for="tipo_usuario">Tipo de usuario <span class="req-mark">*</span></label>
                     <select id="tipo_usuario" name="tipo_usuario" onchange="validar(this)">
                         <option value="" disabled selected>— Seleccionar —</option>
+                        <option value="Operario">Operario</option>
+                        <option value="Supervisor">Supervisor</option>
                         <option value="Administrador">Administrador</option>
-                        <option value="Trabajador">Trabajador</option>
                     </select>
                     <span class="field-error" id="err-tipo_usuario"></span>
                 </div>
@@ -161,15 +162,6 @@
                         <option value="Sistemas">Sistemas</option>
                     </select>
                     <span class="field-error" id="err-area"></span>
-                </div>
-
-                <div class="form-group-vertical">
-                    <label for="puesto">Puesto <span class="req-mark">*</span></label>
-                    <input type="text" id="puesto" name="puesto"
-                           placeholder="Ej. Operador de Campo"
-                           maxlength="100" autocomplete="off"
-                           oninput="this.value=this.value.replace(/[0-9]/g,''); validar(this)">
-                    <span class="field-error" id="err-puesto"></span>
                 </div>
 
                 <div class="form-group-vertical">
@@ -233,13 +225,12 @@ const REGLAS = {
     telefono:     v => v === '' || /^[\d\s+]{7,15}$/.test(v)                 ? '' : 'Teléfono inválido (7–15 dígitos).',
     tipo_usuario: v => v !== ''                                               ? '' : 'Selecciona el tipo de usuario.',
     area:         v => v !== ''                                               ? '' : 'Selecciona un área.',
-    puesto:       v => v.trim().length >= 2                                   ? '' : 'Ingresa el puesto.',
     fecha_ingreso:v => v !== ''                                               ? '' : 'Selecciona la fecha de ingreso.',
     password:     v => v.length >= 6                                          ? '' : 'La contraseña debe tener al menos 6 caracteres.',
     password2:    v => v === document.getElementById('password').value        ? '' : 'Las contraseñas no coinciden.',
 };
 
-const REQUERIDOS = ['dni','nombres','apellidos','tipo_usuario','area','puesto','fecha_ingreso','password','password2'];
+const REQUERIDOS = ['dni','nombres','apellidos','tipo_usuario','area','fecha_ingreso','password','password2'];
 
 function validar(el) {
     const fn    = REGLAS[el.id];
