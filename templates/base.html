@@ -20,8 +20,8 @@
         <div class="user-info">
             <strong>{{ session.get('nombres', 'Usuario') }}</strong>
             <span style="font-size: 11px; color: #a0b0c0;">{{ session.get('tipo_usuario', '') }}</span>
-            <form action="{{ url_for('logout') }}" method="POST" class="logout-form">
-                <button type="submit" class="logout-btn">
+            <form id="logoutForm" action="{{ url_for('logout') }}" method="POST" class="logout-form">
+                <button type="button" class="logout-btn" onclick="confirmarLogout()">
                     Cerrar sesión
                 </button>
             </form>
@@ -101,7 +101,31 @@
         </main>
     </div>
 
+    <!-- Modal de confirmación genérico -->
+    <div id="confirmModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Confirmar</h2>
+            <p id="modalMessage">¿Estás seguro?</p>
+            <div class="modal-buttons">
+                <button type="button" id="modalConfirm" class="btn-modal btn-confirm">Confirmar</button>
+                <button type="button" id="modalCancel" class="btn-modal btn-cancel">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
+    <script>
+        function confirmarLogout() {
+            openModal({
+                title: '¿Cerrar sesión?',
+                message: '¿Estás seguro que deseas cerrar sesión?',
+                onConfirm: () => {
+                    document.getElementById('logoutForm').submit();
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

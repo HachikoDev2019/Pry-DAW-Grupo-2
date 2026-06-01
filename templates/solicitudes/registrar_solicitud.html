@@ -7,7 +7,7 @@
 <section class="form-card">
     <h1>Registrar solicitud</h1>
 
-    <form action="{{ url_for('guardar_solicitud') }}" method="POST">
+    <form id="solicitudForm" action="{{ url_for('guardar_solicitud') }}" method="POST">
         <div class="form-row">
             <label>Trabajador</label>
             <input type="text" name="trabajador" value="{{ trabajador }}" required>
@@ -42,5 +42,15 @@
         </button>
     </form>
 </section>
+
+<script>
+    // Esperar a que todo esté cargado antes de configurar el modal
+    document.addEventListener('DOMContentLoaded', function() {
+        confirmFormSubmit(document.getElementById('solicitudForm'), {
+            title: '¿Deseas registrar la solicitud?',
+            message: 'Verifica que todos los datos sean correctos antes de continuar.'
+        });
+    });
+</script>
 
 {% endblock %}
