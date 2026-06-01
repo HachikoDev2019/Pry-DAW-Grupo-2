@@ -30,7 +30,10 @@
                     <th>Estado</th>
                     <th>Observaciones</th>
                     <th>Fecha Registro</th>
+                    <th>Actualizar</th>
+                    <th>Eliminar</th>
                 </tr>
+                
             </thead>
 
             <tbody>
@@ -50,6 +53,34 @@
                         </td>
                         <td>{{ maquinaria.observaciones or 'Sin observaciones' }}</td>
                         <td>{{ maquinaria.fecha_registro }}</td>
+
+    <td>
+        <button type="button"
+                class="btn-small"
+                onclick="abrirModalMaquinaria('{{ maquinaria.id_maquinaria }}','{{ maquinaria.nombre_codigo }}','{{ maquinaria.tipo }}','{{ maquinaria.marca or '' }}','{{ maquinaria.modelo or '' }}','{{ maquinaria.area or '' }}','{{ maquinaria.estado }}','{{ maquinaria.observaciones or '' }}')">
+            Actualizar
+        </button>
+    </td>
+
+    <td>
+        <form action="{{ url_for('eliminar_maquinaria_web') }}"
+              method="POST"
+              onsubmit="return confirm('¿Está seguro de eliminar esta maquinaria?')">
+
+            <input type="hidden"
+                   name="id_maquinaria"
+                   value="{{ maquinaria.id_maquinaria }}">
+
+            <button type="submit" class="btn-danger">
+                Eliminar
+            </button>
+
+        </form>
+    </td>
+                       
+
+                        
+                        
                     </tr>
                     {% endfor %}
                 {% else %}
@@ -62,4 +93,80 @@
     </div>
 </section>
 
+<div class="modal-overlay" id="modalActualizarMaquinaria">
+    <div class="modal">
+        <h2>Actualizar maquinaria</h2>
+
+        <form action="{{ url_for('actualizar_maquinaria_web') }}" method="POST">
+
+            <input type="hidden"
+                   id="id_maquinaria"
+                   name="id_maquinaria">
+
+            <div class="form-group full">
+                <label>Estado</label>
+
+                <select id="estado_maquinaria"
+                        name="estado"
+                        required>
+
+                    <option value="Operativo">Operativo</option>
+                    <option value="En Mantenimiento">En Mantenimiento</option>
+                    <option value="Inactivo">Inactivo</option>
+
+                </select>
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn-secondary"
+                        onclick="cerrarModalActualizarMaquinaria()">
+                    Cancelar
+                </button>
+
+                <button type="submit"
+                        class="btn-primary">
+                    Guardar cambios
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+function abrirModalMaquinaria(
+    id,
+    nombre,
+    tipo,
+    marca,
+    modelo,
+    area,
+    estado,
+    observaciones
+) {
+
+    document.getElementById("id_maquinaria").value = id;
+    document.getElementById("estado_maquinaria").value = estado;
+
+    document
+        .getElementById("modalActualizarMaquinaria")
+        .classList.add("open");
+}
+
+function cerrarModalActualizarMaquinaria() {
+
+    document
+        .getElementById("modalActualizarMaquinaria")
+        .classList.remove("open");
+}
+
+</script>
 {% endblock %}
+
+
+
+

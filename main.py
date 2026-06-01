@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 
-from maquinariaAD import clsMaquinaria, insertar_maquinaria, listar_maquinarias
+from maquinariaAD import clsMaquinaria, insertar_maquinaria, listar_maquinarias, actualizar_maquinaria, eliminar_maquinaria, obtener_maquinaria
 
 from solicitudAD import (
     clsSolicitud,
@@ -281,6 +281,60 @@ def mis_maquinarias():
         return redirect(url_for("dashboard"))
 
 
+@app.route("/actualizar_maquinaria", methods=["POST"])
+def actualizar_maquinaria_web():
+
+    try:
+
+        resultado = actualizar_maquinaria(
+            request.form["id_maquinaria"],
+            request.form["estado"]
+        )
+
+        if resultado:
+            flash("Estado actualizado correctamente.", "success")
+        else:
+            flash("No se pudo actualizar.", "error")
+
+    except Exception as e:
+        flash(f"Error: {repr(e)}", "error")
+
+    return redirect(url_for("mis_maquinarias"))
+@app.route("/eliminar_maquinaria", methods=["POST"])
+def eliminar_maquinaria_web():
+
+    try:
+
+        id_maquinaria = request.form["id_maquinaria"]
+
+        maquinaria = obtener_maquinaria(id_maquinaria)
+
+        if not maquinaria:
+            flash("La maquinaria no existe.", "error")
+            return redirect(url_for("mis_maquinarias"))
+
+        if maquinaria["estado"] == "Operativo":
+            flash(
+                "No se puede eliminar una maquinaria operativa.",
+                "error"
+            )
+            return redirect(url_for("mis_maquinarias"))
+
+        if eliminar_maquinaria(id_maquinaria):
+            flash(
+                "Maquinaria eliminada correctamente.",
+                "success"
+            )
+        else:
+            flash(
+                "No se pudo eliminar la maquinaria.",
+                "error"
+            )
+
+    except Exception as e:
+        flash(f"Error: {repr(e)}", "error")
+
+    return redirect(url_for("mis_maquinarias"))
 # =========================================================
 # SOLICITUDES - TRABAJADOR
 # =========================================================
@@ -525,7 +579,7 @@ def guardar_checkout(id_actividad):
 # API PERSONAL
 # =========================================================
 
-@app.route("/api_listarpersonal")
+@app.route("/api_listarpersonal", methods=["POST"])
 def api_listarpersonal():
     try:
         resultado = listar_personal()
