@@ -43,8 +43,16 @@ def es_administrador():
     return session.get("tipo_usuario") == "Administrador"
 
 
-def es_trabajador():
-    return session.get("tipo_usuario") == "Trabajador"
+def es_supervisor():
+    return session.get("tipo_usuario") == "Supervisor"
+
+
+def es_operario():
+    return session.get("tipo_usuario") == "Operario"
+
+
+def es_supervisor_o_admin():
+    return session.get("tipo_usuario") in ("Supervisor", "Administrador")
 
 
 def nombre_usuario_actual():
@@ -121,12 +129,11 @@ def guardar_personal():
     correo = request.form.get("correo", "").strip()
     tipo_usuario = request.form.get("tipo_usuario", "").strip()
     area = request.form.get("area", "").strip()
-    puesto = request.form.get("puesto", "").strip()
     fecha_ingreso = request.form.get("fecha_ingreso", "").strip()
     password = request.form.get("password", "")
     password2 = request.form.get("password2", "")
 
-    if not all([dni, nombres, apellidos, tipo_usuario, area, puesto, fecha_ingreso, password]):
+    if not all([dni, nombres, apellidos, tipo_usuario, area, fecha_ingreso, password]):
         flash("Completa todos los campos obligatorios.", "error")
         return redirect(url_for("registro"))
 
@@ -149,11 +156,10 @@ def guardar_personal():
             apellidos,
             telefono,
             correo,
-            password,
             tipo_usuario,
             area,
-            puesto,
-            fecha_ingreso
+            fecha_ingreso,
+            password
         )
 
         if insertar_personal(personal):
@@ -178,7 +184,7 @@ def registro_maquinaria():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_administrador():
+    if not es_supervisor_o_admin():
         flash("No tienes permisos para registrar maquinaria.", "error")
         return redirect(url_for("dashboard"))
 
@@ -199,7 +205,7 @@ def guardar_maquinaria():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_administrador():
+    if not es_supervisor_o_admin():
         flash("No tienes permisos para registrar maquinaria.", "error")
         return redirect(url_for("dashboard"))
 
@@ -268,7 +274,7 @@ def mis_maquinarias():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_administrador():
+    if not es_supervisor_o_admin():
         flash("No tienes permisos para ver maquinaria.", "error")
         return redirect(url_for("dashboard"))
 
@@ -336,7 +342,8 @@ def eliminar_maquinaria_web():
 
     return redirect(url_for("mis_maquinarias"))
 # =========================================================
-# SOLICITUDES - TRABAJADOR
+# =========================================================
+# SOLICITUDES - OPERARIO
 # =========================================================
 
 @app.route("/registrar_solicitud")
@@ -345,7 +352,7 @@ def registrar_solicitud():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_trabajador():
+    if not es_operario():
         flash("No tienes permisos para registrar solicitudes.", "error")
         return redirect(url_for("dashboard"))
 
@@ -361,7 +368,7 @@ def guardar_solicitud():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_trabajador():
+    if not es_operario():
         flash("No tienes permisos para registrar solicitudes.", "error")
         return redirect(url_for("dashboard"))
 
@@ -391,8 +398,8 @@ def mis_solicitudes():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_trabajador():
-        flash("No tienes permisos para ver solicitudes de trabajador.", "error")
+    if not es_operario():
+        flash("No tienes permisos para ver solicitudes.", "error")
         return redirect(url_for("dashboard"))
 
     solicitudes = listar_mis_solicitudes(nombre_usuario_actual())
@@ -404,7 +411,8 @@ def mis_solicitudes():
 
 
 # =========================================================
-# SOLICITUDES - ADMINISTRADOR
+# =========================================================
+# SOLICITUDES - SUPERVISOR / ADMINISTRADOR
 # =========================================================
 
 @app.route("/gestion_solicitudes")
@@ -413,7 +421,7 @@ def gestion_solicitudes():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_administrador():
+    if not es_supervisor_o_admin():
         flash("No tienes permisos para acceder a esta sección.", "error")
         return redirect(url_for("dashboard"))
 
@@ -438,7 +446,7 @@ def actualizar_solicitud_estado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_administrador():
+    if not es_supervisor_o_admin():
         flash("No tienes permisos para actualizar solicitudes.", "error")
         return redirect(url_for("dashboard"))
 
@@ -460,7 +468,8 @@ def actualizar_solicitud_estado():
 
 
 # =========================================================
-# ACTIVIDAD MAQUINARIA - ADMINISTRADOR
+# =========================================================
+# ACTIVIDAD MAQUINARIA - OPERARIO / SUPERVISOR / ADMINISTRADOR
 # =========================================================
 
 @app.route("/actividad_maquinaria")
@@ -469,7 +478,7 @@ def actividad_maquinaria():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_administrador():
+    if not usuario_logueado():
         flash("No tienes permisos para acceder a actividad de maquinaria.", "error")
         return redirect(url_for("dashboard"))
 
@@ -483,7 +492,7 @@ def checkin_actividad():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_administrador():
+    if not usuario_logueado():
         flash("No tienes permisos para iniciar actividad de maquinaria.", "error")
         return redirect(url_for("dashboard"))
 
@@ -496,7 +505,7 @@ def guardar_checkin():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_administrador():
+    if not usuario_logueado():
         flash("No tienes permisos para iniciar actividad de maquinaria.", "error")
         return redirect(url_for("dashboard"))
 
@@ -528,7 +537,7 @@ def monitoreo_activo(id_actividad):
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_administrador():
+    if not usuario_logueado():
         flash("No tienes permisos para monitorear maquinaria.", "error")
         return redirect(url_for("dashboard"))
 
@@ -547,7 +556,7 @@ def guardar_checkout(id_actividad):
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not es_administrador():
+    if not usuario_logueado():
         flash("No tienes permisos para finalizar actividad de maquinaria.", "error")
         return redirect(url_for("dashboard"))
 
@@ -628,11 +637,10 @@ def api_guardarpersonal():
             request.json["apellidos"],
             request.json.get("telefono", ""),
             request.json.get("correo", ""),
-            request.json["password"],
             request.json["tipo_usuario"],
             request.json["area"],
-            request.json["puesto"],
-            request.json["fecha_ingreso"]
+            request.json["fecha_ingreso"],
+            request.json["password"]
         )
 
         if insertar_personal(obj_personal):

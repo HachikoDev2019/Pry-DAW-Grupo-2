@@ -45,12 +45,12 @@ CREATE TABLE IF NOT EXISTS personal (
     password VARCHAR(255) NOT NULL,
 
     tipo_usuario ENUM(
-        'Administrador',
-        'Trabajador'
-    ) NOT NULL DEFAULT 'Trabajador',
+        'Operario',
+        'Supervisor',
+        'Administrador'
+    ) NOT NULL DEFAULT 'Operario',
 
     area VARCHAR(100) NOT NULL,
-    puesto VARCHAR(100) NOT NULL,
 
     fecha_ingreso DATE NOT NULL,
 
@@ -133,7 +133,6 @@ INSERT INTO personal (
     password,
     tipo_usuario,
     area,
-    puesto,
     fecha_ingreso,
     estado,
     observaciones
@@ -147,7 +146,6 @@ VALUES (
     '1234',
     'Administrador',
     'Sistemas',
-    'Administrador',
     CURDATE(),
     'Activo',
     'Acceso principal'
@@ -166,7 +164,6 @@ INSERT INTO personal (
     password,
     tipo_usuario,
     area,
-    puesto,
     fecha_ingreso,
     estado,
     observaciones
@@ -180,12 +177,11 @@ VALUES
     '911111111',
     'carlos.ramirez@gmail.com',
     '123456',
-    'Trabajador',
+    'Operario',
     'Campo',
-    'Operario de Campo',
     CURDATE(),
     'Activo',
-    'Trabajador de prueba'
+    'Operario de prueba'
 ),
 
 (
@@ -195,12 +191,11 @@ VALUES
     '922222222',
     'maria.torres@gmail.com',
     '123456',
-    'Trabajador',
+    'Operario',
     'Fábrica',
-    'Asistente de Producción',
     CURDATE(),
     'Activo',
-    'Trabajadora de prueba'
+    'Operaria de prueba'
 ),
 
 (
@@ -210,12 +205,11 @@ VALUES
     '933333333',
     'luis.fernandez@gmail.com',
     '123456',
-    'Trabajador',
+    'Operario',
     'Mantenimiento',
-    'Técnico de Mantenimiento',
     CURDATE(),
     'Activo',
-    'Trabajador de prueba'
+    'Operario de prueba'
 );
 
 -- =========================================================

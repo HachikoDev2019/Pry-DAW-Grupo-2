@@ -598,6 +598,111 @@ body.login-body, body:has(.card) {
     box-shadow: 0 0 0 3.5px rgba(91,127,177,0.13);
 }
 
+/* ==========================================================================
+   3. MODAL DE CONFIRMACIÓN GENÉRICO
+   ========================================================================== */
+
+#confirmModal {
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 3000 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    pointer-events: none;
+}
+
+#confirmModal[style*="display: flex"] {
+    display: flex !important;
+    pointer-events: auto;
+}
+
+#confirmModal .modal-content {
+    position: relative;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 3001;
+    margin: 0;
+    border: none;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+#confirmModal h2 {
+    font-size: 20px;
+    color: #2d3436;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+#confirmModal p {
+    color: #666666;
+    font-size: 15px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-modal {
+    padding: 11px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-confirm {
+    background: #5b7fb1;
+    color: #ffffff;
+}
+
+.btn-confirm:hover {
+    background: #3d5a82;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(91, 127, 177, 0.3);
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #333333;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
 .input-wrap { 
     position: relative; 
 }

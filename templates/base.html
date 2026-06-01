@@ -68,7 +68,30 @@
                 </li>
                 {% endif %}
 
-                {% if session.get('tipo_usuario') == 'Trabajador' %}
+                {% if session.get('tipo_usuario') == 'Supervisor' %}
+                <li>
+                    <a class="{% if request.path == '/gestion_solicitudes' %}active{% endif %}"
+                        href="{{ url_for('gestion_solicitudes') }}">
+                        Gestión de Solicitudes
+                    </a>
+                </li>
+
+                <li>
+                    <a class="{% if request.path == '/mis_maquinarias' or request.path == '/registro_maquinaria' %}active{% endif %}"
+                        href="{{ url_for('mis_maquinarias') }}">
+                        Maquinaria
+                    </a>
+                </li>
+
+                <li>
+                    <a class="{% if request.path.startswith('/actividad') %}active{% endif %}"
+                        href="{{ url_for('actividad_maquinaria') }}">
+                        Actividad Maquinaria
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if session.get('tipo_usuario') == 'Operario' %}
                 <li>
                     <a class="{% if request.path == '/registrar_solicitud' %}active{% endif %}"
                         href="{{ url_for('registrar_solicitud') }}">
@@ -80,6 +103,13 @@
                     <a class="{% if request.path == '/mis_solicitudes' %}active{% endif %}"
                         href="{{ url_for('mis_solicitudes') }}">
                         Mis Solicitudes
+                    </a>
+                </li>
+
+                <li>
+                    <a class="{% if request.path.startswith('/actividad') %}active{% endif %}"
+                        href="{{ url_for('actividad_maquinaria') }}">
+                        Actividad Maquinaria
                     </a>
                 </li>
                 {% endif %}
