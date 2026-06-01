@@ -59,7 +59,6 @@ CREATE TABLE IF NOT EXISTS personal (
         'Inactivo'
     ) NOT NULL DEFAULT 'Activo',
 
-    observaciones TEXT
 );
 
 -- =========================================================
