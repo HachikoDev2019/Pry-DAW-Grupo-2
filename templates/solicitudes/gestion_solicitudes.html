@@ -110,7 +110,7 @@
     <div class="modal">
         <h2>Actualizar solicitud</h2>
 
-        <form action="{{ url_for('actualizar_solicitud_estado') }}" method="POST">
+        <form id="actualizarSolicitudForm" action="{{ url_for('actualizar_solicitud_estado') }}" method="POST">
             <input type="hidden" id="id_solicitud" name="id_solicitud">
 
             <div class="form-group full">
@@ -130,7 +130,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn-secondary" onclick="cerrarModalActualizar()">Cancelar</button>
-                <button type="submit" class="btn-primary">Guardar cambios</button>
+                <button type="button" class="btn-primary" onclick="confirmarActualizarSolicitud()">Guardar cambios</button>
             </div>
         </form>
     </div>
@@ -146,6 +146,17 @@ function abrirModalActualizar(id, estado, comentario) {
 
 function cerrarModalActualizar() {
     document.getElementById("modalActualizarSolicitud").classList.remove("open");
+}
+
+function confirmarActualizarSolicitud() {
+    const nuevoEstado = document.getElementById("estado_solicitud").value;
+    openModal({
+        title: 'Confirmar Cambio de Estado',
+        message: '¿Estás seguro que deseas cambiar el estado a "' + nuevoEstado + '"?',
+        onConfirm: () => {
+            document.getElementById("actualizarSolicitudForm").submit();
+        }
+    });
 }
 </script>
 

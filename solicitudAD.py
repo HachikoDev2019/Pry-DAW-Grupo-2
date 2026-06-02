@@ -104,3 +104,42 @@ def actualizar_solicitud(id_solicitud, estado, comentario):
     except Exception as e:
         print("Error al actualizar solicitud:", repr(e))
         return False
+
+
+def eliminar_solicitud(id_solicitud):
+    try:
+        conn = obtener_conexion()
+        if conn is None:
+            return False
+        with conn:
+            with conn.cursor() as cursor:
+                sql = "DELETE FROM solicitudes WHERE id_solicitud = %s"
+                cursor.execute(sql, (id_solicitud,))
+            conn.commit()
+        return True
+    except Exception as e:
+        print("Error al eliminar solicitud:", repr(e))
+        return False
+
+
+def actualizar_solicitud_operario(id_solicitud, descripcion, area, prioridad):
+    """Actualiza solo los campos que el operario puede editar (NO estado)"""
+    try:
+        conn = obtener_conexion()
+        if conn is None:
+            return False
+        with conn:
+            with conn.cursor() as cursor:
+                sql = """
+                    UPDATE solicitudes
+                    SET descripcion = %s,
+                        area = %s,
+                        prioridad = %s
+                    WHERE id_solicitud = %s
+                """
+                cursor.execute(sql, (descripcion, area, prioridad, id_solicitud))
+            conn.commit()
+        return True
+    except Exception as e:
+        print("Error al actualizar solicitud:", repr(e))
+        return False

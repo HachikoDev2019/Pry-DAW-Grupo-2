@@ -7,7 +7,9 @@ from solicitudAD import (
     insertar_solicitud,
     listar_mis_solicitudes,
     listar_todas_solicitudes,
-    actualizar_solicitud
+    actualizar_solicitud,
+    eliminar_solicitud,
+    actualizar_solicitud_operario
 )
 
 from personalAD import (
@@ -465,6 +467,55 @@ def actualizar_solicitud_estado():
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("gestion_solicitudes"))
+
+
+@app.route("/actualizar_solicitud_operario", methods=["POST"])
+def actualizar_solicitud_operario_route():
+    if not usuario_logueado() or not es_operario():
+        flash("No tienes permisos para actualizar solicitudes.", "error")
+        return redirect(url_for("mis_solicitudes"))
+
+    try:
+        id_solicitud = request.form["id_solicitud"]
+        descripcion = request.form.get("descripcion", "").strip()
+        area = request.form.get("area", "")
+        prioridad = request.form.get("prioridad", "")
+
+        if not descripcion or not area or not prioridad:
+            flash("Complete todos los campos obligatorios.", "error")
+            return redirect(url_for("mis_solicitudes"))
+
+        if actualizar_solicitud_operario(id_solicitud, descripcion, area, prioridad):
+            flash("Solicitud actualizada correctamente.", "success")
+        else:
+            flash("Error al actualizar la solicitud.", "error")
+
+        return redirect(url_for("mis_solicitudes"))
+
+    except Exception as e:
+        flash(f"Error inesperado: {repr(e)}", "error")
+        return redirect(url_for("mis_solicitudes"))
+
+
+@app.route("/eliminar_solicitud", methods=["POST"])
+def eliminar_solicitud_web():
+    if not usuario_logueado() or not es_operario():
+        flash("No tienes permisos para eliminar solicitudes.", "error")
+        return redirect(url_for("mis_solicitudes"))
+
+    try:
+        id_solicitud = request.form.get("id_solicitud")
+        
+        if eliminar_solicitud(id_solicitud):
+            flash("Solicitud eliminada correctamente.", "success")
+        else:
+            flash("Error al eliminar la solicitud.", "error")
+
+        return redirect(url_for("mis_solicitudes"))
+
+    except Exception as e:
+        flash(f"Error inesperado: {repr(e)}", "error")
+        return redirect(url_for("mis_solicitudes"))
 
 
 # =========================================================

@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS personal (
     estado ENUM(
         'Activo',
         'Inactivo'
-    ) NOT NULL DEFAULT 'Activo',
+    ) NOT NULL DEFAULT 'Activo'
 
 );
 
