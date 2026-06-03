@@ -7,7 +7,7 @@
 <section class="form-card">
     <h1>Registro de maquinaria</h1>
 
-    <form action="{{ url_for('guardar_maquinaria') }}" method="POST">
+    <form id="registroMaquinariaForm" action="{{ url_for('guardar_maquinaria') }}" method="POST">
         <div class="form-row">
             <label for="nombre_codigo">Nombre/Código</label>
             <input type="text" id="nombre_codigo" name="nombre_codigo" required>
@@ -51,10 +51,39 @@
             <textarea id="observaciones" name="observaciones" rows="4"></textarea>
         </div>
 
-        <button type="submit" class="btn-submit">
+        <button type="button" class="btn-submit" onclick="confirmarRegistroMaquinaria()">
             Registrar
         </button>
     </form>
 </section>
+
+<script>
+function confirmarRegistroMaquinaria() {
+    const nombre = document.getElementById("nombre_codigo").value.trim();
+    const tipo = document.getElementById("tipo").value.trim();
+    
+    if (!nombre || !tipo) {
+        openModal({
+            title: 'Campos requeridos',
+            message: 'Por favor complete los campos obligatorios: Nombre/Código y Tipo.',
+            onConfirm: () => {
+                closeModal();
+            }
+        });
+        return;
+    }
+    
+    const area = document.getElementById("area").value;
+    const estado = document.getElementById("estado").value;
+    
+    openModal({
+        title: 'Confirmar registro',
+        message: 'Nombre: ' + nombre + '\nTipo: ' + tipo + '\nÁrea: ' + area + '\nEstado: ' + estado + '\n\n¿Deseas registrar esta maquinaria?',
+        onConfirm: () => {
+            document.getElementById("registroMaquinariaForm").submit();
+        }
+    });
+}
+</script>
 
 {% endblock %}
