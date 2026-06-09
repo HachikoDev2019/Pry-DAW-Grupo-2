@@ -547,7 +547,13 @@ def checkin_actividad():
         flash("No tienes permisos para iniciar actividad de maquinaria.", "error")
         return redirect(url_for("dashboard"))
 
-    return render_template("actividad/checkin.html")
+    # =========================================================================
+    # AQUI ESTA LA ACTUALIZACION SOLICITADA PARA EL FORMULARIO CHECK-IN
+    # =========================================================================
+    todas_las_maquinas = listar_maquinarias()
+    maquinas_disponibles = [m for m in todas_las_maquinas if m['estado'] == 'Operativo']
+
+    return render_template("actividad/checkin.html", maquinas=maquinas_disponibles)
 
 
 @app.route("/guardar_checkin", methods=["POST"])
