@@ -1,13 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 
-from maquinariaAD import clsMaquinaria, insertar_maquinaria, listar_maquinarias
+from maquinariaAD import clsMaquinaria, insertar_maquinaria, listar_maquinarias, actualizar_maquinaria, eliminar_maquinaria, obtener_maquinaria
 
 from solicitudAD import (
     clsSolicitud,
     insertar_solicitud,
     listar_mis_solicitudes,
     listar_todas_solicitudes,
-    actualizar_solicitud
+    actualizar_solicitud,
+    eliminar_solicitud,
+    actualizar_solicitud_operario
 )
 
 from personalAD import (
@@ -287,6 +289,60 @@ def mis_maquinarias():
         return redirect(url_for("dashboard"))
 
 
+@app.route("/actualizar_maquinaria", methods=["POST"])
+def actualizar_maquinaria_web():
+
+    try:
+
+        resultado = actualizar_maquinaria(
+            request.form["id_maquinaria"],
+            request.form["estado"]
+        )
+
+        if resultado:
+            flash("Estado actualizado correctamente.", "success")
+        else:
+            flash("No se pudo actualizar.", "error")
+
+    except Exception as e:
+        flash(f"Error: {repr(e)}", "error")
+
+    return redirect(url_for("mis_maquinarias"))
+@app.route("/eliminar_maquinaria", methods=["POST"])
+def eliminar_maquinaria_web():
+
+    try:
+
+        id_maquinaria = request.form["id_maquinaria"]
+
+        maquinaria = obtener_maquinaria(id_maquinaria)
+
+        if not maquinaria:
+            flash("La maquinaria no existe.", "error")
+            return redirect(url_for("mis_maquinarias"))
+
+        if maquinaria["estado"] == "Operativo":
+            flash(
+                "No se puede eliminar una maquinaria operativa.",
+                "error"
+            )
+            return redirect(url_for("mis_maquinarias"))
+
+        if eliminar_maquinaria(id_maquinaria):
+            flash(
+                "Maquinaria eliminada correctamente.",
+                "success"
+            )
+        else:
+            flash(
+                "No se pudo eliminar la maquinaria.",
+                "error"
+            )
+
+    except Exception as e:
+        flash(f"Error: {repr(e)}", "error")
+
+    return redirect(url_for("mis_maquinarias"))
 # =========================================================
 # =========================================================
 # SOLICITUDES - OPERARIO
@@ -413,6 +469,55 @@ def actualizar_solicitud_estado():
         return redirect(url_for("gestion_solicitudes"))
 
 
+@app.route("/actualizar_solicitud_operario", methods=["POST"])
+def actualizar_solicitud_operario_route():
+    if not usuario_logueado() or not es_operario():
+        flash("No tienes permisos para actualizar solicitudes.", "error")
+        return redirect(url_for("mis_solicitudes"))
+
+    try:
+        id_solicitud = request.form["id_solicitud"]
+        descripcion = request.form.get("descripcion", "").strip()
+        area = request.form.get("area", "")
+        prioridad = request.form.get("prioridad", "")
+
+        if not descripcion or not area or not prioridad:
+            flash("Complete todos los campos obligatorios.", "error")
+            return redirect(url_for("mis_solicitudes"))
+
+        if actualizar_solicitud_operario(id_solicitud, descripcion, area, prioridad):
+            flash("Solicitud actualizada correctamente.", "success")
+        else:
+            flash("Error al actualizar la solicitud.", "error")
+
+        return redirect(url_for("mis_solicitudes"))
+
+    except Exception as e:
+        flash(f"Error inesperado: {repr(e)}", "error")
+        return redirect(url_for("mis_solicitudes"))
+
+
+@app.route("/eliminar_solicitud", methods=["POST"])
+def eliminar_solicitud_web():
+    if not usuario_logueado() or not es_operario():
+        flash("No tienes permisos para eliminar solicitudes.", "error")
+        return redirect(url_for("mis_solicitudes"))
+
+    try:
+        id_solicitud = request.form.get("id_solicitud")
+        
+        if eliminar_solicitud(id_solicitud):
+            flash("Solicitud eliminada correctamente.", "success")
+        else:
+            flash("Error al eliminar la solicitud.", "error")
+
+        return redirect(url_for("mis_solicitudes"))
+
+    except Exception as e:
+        flash(f"Error inesperado: {repr(e)}", "error")
+        return redirect(url_for("mis_solicitudes"))
+
+
 # =========================================================
 # =========================================================
 # ACTIVIDAD MAQUINARIA - OPERARIO / SUPERVISOR / ADMINISTRADOR
@@ -438,11 +543,15 @@ def checkin_actividad():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not usuario_logueado():
-        flash("No tienes permisos para iniciar actividad de maquinaria.", "error")
-        return redirect(url_for("dashboard"))
+    # ¡AQUÍ ESTÁ EL CANDADO! Si entra el Admin o Supervisor, los rebota.
+    if not es_operario():
+        flash("Solo los Operarios pueden hacer el Check-In de maquinaria.", "error")
+        return redirect(url_for("actividad_maquinaria"))
 
-    return render_template("actividad/checkin.html")
+    todas_las_maquinas = listar_maquinarias()
+    maquinas_disponibles = [m for m in todas_las_maquinas if m['estado'] == 'Operativo']
+
+    return render_template("actividad/checkin.html", maquinas=maquinas_disponibles)
 
 
 @app.route("/guardar_checkin", methods=["POST"])
@@ -451,8 +560,9 @@ def guardar_checkin():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not usuario_logueado():
-        flash("No tienes permisos para iniciar actividad de maquinaria.", "error")
+    # ¡CANDADO AQUÍ TAMBIÉN!
+    if not es_operario():
+        flash("Solo los Operarios pueden iniciar actividad.", "error")
         return redirect(url_for("dashboard"))
 
     try:
@@ -475,7 +585,6 @@ def guardar_checkin():
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("checkin_actividad"))
-
 
 @app.route("/actividad/activo/<int:id_actividad>")
 def monitoreo_activo(id_actividad):
@@ -534,7 +643,7 @@ def guardar_checkout(id_actividad):
 # API PERSONAL
 # =========================================================
 
-@app.route("/api_listarpersonal")
+@app.route("/api_listarpersonal", methods=["POST"])
 def api_listarpersonal():
     try:
         resultado = listar_personal()
@@ -666,4 +775,7 @@ def api_guardarsolicitud():
 
 if __name__ == "__main__":
     app.run(debug=True)
+<<<<<<< HEAD
     
+=======
+>>>>>>> e338179015068849a9cd650db910236b89f30ae0

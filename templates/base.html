@@ -20,8 +20,8 @@
         <div class="user-info">
             <strong>{{ session.get('nombres', 'Usuario') }}</strong>
             <span style="font-size: 11px; color: #a0b0c0;">{{ session.get('tipo_usuario', '') }}</span>
-            <form action="{{ url_for('logout') }}" method="POST" class="logout-form">
-                <button type="submit" class="logout-btn">
+            <form id="logoutForm" action="{{ url_for('logout') }}" method="POST" class="logout-form">
+                <button type="button" class="logout-btn" onclick="confirmLogout()">
                     Cerrar sesión
                 </button>
             </form>
@@ -131,6 +131,19 @@
         </main>
     </div>
 
+    <!-- Modal de Confirmación Genérico -->
+    <div id="confirmModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Confirmar</h2>
+            <p id="modalMessage">¿Estás seguro?</p>
+            <div class="modal-buttons">
+                <button id="modalCancel" class="btn-modal btn-cancel">Cancelar</button>
+                <button id="modalConfirm" class="btn-modal btn-confirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 

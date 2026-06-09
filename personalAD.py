@@ -4,7 +4,7 @@ import pymysql.cursors
  
 class clsPersonal:
     def __init__(self, dni, nombres, apellidos, telefono, correo,
-                 tipo_usuario, area, puesto, fecha_ingreso, password):
+                 tipo_usuario, area, fecha_ingreso, password):
         self.dni           = dni
         self.nombres       = nombres
         self.apellidos     = apellidos
@@ -12,7 +12,6 @@ class clsPersonal:
         self.correo        = correo
         self.tipo_usuario  = tipo_usuario
         self.area          = area
-        self.puesto        = puesto
         self.fecha_ingreso = fecha_ingreso
         self.password      = password
  
@@ -30,8 +29,8 @@ def insertar_personal(personal):
                 sql = """
                     INSERT INTO personal
                     (dni, nombres, apellidos, telefono, correo,
-                     tipo_usuario, area, puesto, fecha_ingreso, password)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                     tipo_usuario, area, fecha_ingreso, password)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
                 cursor.execute(sql, (
                     personal.dni,
@@ -41,7 +40,6 @@ def insertar_personal(personal):
                     personal.correo,
                     personal.tipo_usuario,
                     personal.area,
-                    personal.puesto,
                     personal.fecha_ingreso,
                     personal.password
                 ))
@@ -115,7 +113,7 @@ def listar_personal():
                 cursor.execute("""
                     SELECT id_personal, dni, nombres, apellidos,
                            telefono, correo, tipo_usuario,
-                           area, puesto, fecha_ingreso, estado
+                           area, fecha_ingreso, estado
                     FROM personal
                     ORDER BY id_personal ASC
                 """)
@@ -139,7 +137,7 @@ def leer_personal_xDNI(dni):
                 cursor.execute("""
                     SELECT id_personal, dni, nombres, apellidos,
                            telefono, correo, tipo_usuario,
-                           area, puesto, fecha_ingreso, estado
+                           area, fecha_ingreso, estado
                     FROM personal
                     WHERE TRIM(dni) = %s
                 """, (str(dni).strip(),))

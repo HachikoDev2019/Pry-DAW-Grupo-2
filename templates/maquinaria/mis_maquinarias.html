@@ -30,7 +30,10 @@
                     <th>Estado</th>
                     <th>Observaciones</th>
                     <th>Fecha Registro</th>
+                    <th>Actualizar</th>
+                    <th>Eliminar</th>
                 </tr>
+                
             </thead>
 
             <tbody>
@@ -50,6 +53,26 @@
                         </td>
                         <td>{{ maquinaria.observaciones or 'Sin observaciones' }}</td>
                         <td>{{ maquinaria.fecha_registro }}</td>
+
+    <td>
+        <button type="button"
+                class="btn-small"
+                onclick="abrirModalMaquinaria('{{ maquinaria.id_maquinaria }}','{{ maquinaria.estado }}')">
+            Actualizar
+        </button>
+    </td>
+
+    <td>
+        <button type="button"
+                class="btn-danger"
+                onclick="confirmarEliminarMaquinaria('{{ maquinaria.id_maquinaria }}')">
+            Eliminar
+        </button>
+    </td>
+                       
+
+                        
+                        
                     </tr>
                     {% endfor %}
                 {% else %}
@@ -62,4 +85,92 @@
     </div>
 </section>
 
+<div class="modal-overlay" id="modalActualizarMaquinaria">
+    <div class="modal">
+        <h2>Actualizar estado</h2>
+
+        <form id="actualizarMaquinariaForm" action="{{ url_for('actualizar_maquinaria_web') }}" method="POST">
+
+            <input type="hidden"
+                   id="id_maquinaria"
+                   name="id_maquinaria">
+
+            <div class="form-group full">
+                <label>Estado</label>
+
+                <select id="estado_maquinaria"
+                        name="estado"
+                        required>
+
+                    <option value="Operativo">Operativo</option>
+                    <option value="En Mantenimiento">En Mantenimiento</option>
+                    <option value="Inactivo">Inactivo</option>
+
+                </select>
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn-secondary"
+                        onclick="cerrarModalActualizarMaquinaria()">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        class="btn-primary"
+                        onclick="confirmarActualizarMaquinaria()">
+                    Guardar cambios
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<!-- Formulario oculto para eliminar -->
+<form id="eliminarMaquinariaForm" action="{{ url_for('eliminar_maquinaria_web') }}" method="POST" style="display: none;">
+    <input type="hidden" id="id_maquinaria_eliminar" name="id_maquinaria">
+</form>
+
+<script>
+function abrirModalMaquinaria(id, estado) {
+    document.getElementById("id_maquinaria").value = id;
+    document.getElementById("estado_maquinaria").value = estado;
+    document.getElementById("modalActualizarMaquinaria").classList.add("open");
+}
+
+function cerrarModalActualizarMaquinaria() {
+    document.getElementById("modalActualizarMaquinaria").classList.remove("open");
+}
+
+function confirmarActualizarMaquinaria() {
+    const estado = document.getElementById("estado_maquinaria").value;
+    
+    openModal({
+        title: 'Confirmar cambios',
+        message: 'Nuevo estado: ' + estado + '\n\nEstas seguro que deseas guardar los cambios?',
+        onConfirm: () => {
+            document.getElementById("actualizarMaquinariaForm").submit();
+        }
+    });
+}
+
+function confirmarEliminarMaquinaria(id) {
+    openModal({
+        title: 'Eliminar maquinaria',
+        message: 'Estas seguro que deseas eliminar esta maquinaria? Esta accion no se puede deshacer.',
+        onConfirm: () => {
+            document.getElementById("id_maquinaria_eliminar").value = id;
+            document.getElementById("eliminarMaquinariaForm").submit();
+        }
+    });
+}
+</script>
 {% endblock %}
+
+
+
+

@@ -104,3 +104,83 @@ def listar_maquinarias_filtradas(estado=None, area=None, tipo=None):
     except Exception as e:
         print("Error al filtrar maquinarias:", repr(e))
         return []
+    
+
+def actualizar_maquinaria(id_maquinaria, estado):
+    try:
+        conn = obtener_conexion()
+
+        if conn is None:
+            return False
+
+        with conn:
+            with conn.cursor() as cursor:
+
+                sql = """
+                    UPDATE maquinaria
+                    SET estado = %s
+                    WHERE id_maquinaria = %s
+                """
+
+                cursor.execute(sql, (estado, id_maquinaria))
+
+            conn.commit()
+
+        return True
+
+    except Exception as e:
+        print("Error al actualizar maquinaria:", repr(e))
+        return False
+    
+
+
+
+def eliminar_maquinaria(id_maquinaria):
+    try:
+        conn = obtener_conexion()
+
+        if conn is None:
+            return False
+
+        with conn:
+            with conn.cursor() as cursor:
+
+                sql = """
+                DELETE FROM maquinaria
+                WHERE id_maquinaria = %s
+                """
+
+                cursor.execute(sql, (id_maquinaria,))
+
+            conn.commit()
+
+        return True
+
+    except Exception as e:
+        print("Error al eliminar maquinaria:", repr(e))
+        return False
+
+
+
+def obtener_maquinaria(id_maquinaria):
+    try:
+        conn = obtener_conexion()
+
+        if conn is None:
+            return None
+
+        with conn:
+            with conn.cursor() as cursor:
+
+                sql = """
+                SELECT *
+                FROM maquinaria
+                WHERE id_maquinaria = %s
+                """
+
+                cursor.execute(sql, (id_maquinaria,))
+                return cursor.fetchone()
+
+    except Exception as e:
+        print("Error:", repr(e))
+        return None

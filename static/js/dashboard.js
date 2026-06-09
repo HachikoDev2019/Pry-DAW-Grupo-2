@@ -6,7 +6,7 @@ function nextCode() {
     return 'REQ-' + String(reqCounter).padStart(4, '0');
 }
 
-function openModal() {
+function openModalReq() {
     const modal = document.getElementById('modalReq');
 
     if (!modal) return;
@@ -23,7 +23,7 @@ function openModal() {
     modal.classList.add('open');
 }
 
-function closeModal() {
+function closeModalReq() {
     const modal = document.getElementById('modalReq');
 
     if (!modal) return;
@@ -55,7 +55,7 @@ function saveReq() {
         estado
     });
 
-    closeModal();
+    closeModalReq();
     renderTable();
     updateStats();
     notify('Requerimiento registrado correctamente');
@@ -145,6 +145,6 @@ document.addEventListener('click', function (event) {
     const modal = document.getElementById('modalReq');
 
     if (modal && event.target === modal) {
-        closeModal();
+        closeModalReq();
     }
 });
