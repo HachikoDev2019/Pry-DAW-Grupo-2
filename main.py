@@ -543,13 +543,11 @@ def checkin_actividad():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not usuario_logueado():
-        flash("No tienes permisos para iniciar actividad de maquinaria.", "error")
-        return redirect(url_for("dashboard"))
+    # ¡AQUÍ ESTÁ EL CANDADO! Si entra el Admin o Supervisor, los rebota.
+    if not es_operario():
+        flash("Solo los Operarios pueden hacer el Check-In de maquinaria.", "error")
+        return redirect(url_for("actividad_maquinaria"))
 
-    # =========================================================================
-    # AQUI ESTA LA ACTUALIZACION SOLICITADA PARA EL FORMULARIO CHECK-IN
-    # =========================================================================
     todas_las_maquinas = listar_maquinarias()
     maquinas_disponibles = [m for m in todas_las_maquinas if m['estado'] == 'Operativo']
 
@@ -562,8 +560,9 @@ def guardar_checkin():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not usuario_logueado():
-        flash("No tienes permisos para iniciar actividad de maquinaria.", "error")
+    # ¡CANDADO AQUÍ TAMBIÉN!
+    if not es_operario():
+        flash("Solo los Operarios pueden iniciar actividad.", "error")
         return redirect(url_for("dashboard"))
 
     try:
@@ -586,7 +585,6 @@ def guardar_checkin():
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("checkin_actividad"))
-
 
 @app.route("/actividad/activo/<int:id_actividad>")
 def monitoreo_activo(id_actividad):
