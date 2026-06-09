@@ -1,3 +1,5 @@
 Flask
 PyMySQL
 mysql-connector-python
+anthropic
+python-dotenv

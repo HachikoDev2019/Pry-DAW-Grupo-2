@@ -529,10 +529,6 @@ def actividad_maquinaria():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not usuario_logueado():
-        flash("No tienes permisos para acceder a actividad de maquinaria.", "error")
-        return redirect(url_for("dashboard"))
-
     actividades = listar_actividades_activas()
     return render_template("actividad/listado.html", actividades=actividades)
 
@@ -543,7 +539,6 @@ def checkin_actividad():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    # ¡AQUÍ ESTÁ EL CANDADO! Si entra el Admin o Supervisor, los rebota.
     if not es_operario():
         flash("Solo los Operarios pueden hacer el Check-In de maquinaria.", "error")
         return redirect(url_for("actividad_maquinaria"))
@@ -592,10 +587,6 @@ def monitoreo_activo(id_actividad):
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not usuario_logueado():
-        flash("No tienes permisos para monitorear maquinaria.", "error")
-        return redirect(url_for("dashboard"))
-
     actividad = obtener_actividad(id_actividad)
 
     if actividad:
@@ -611,8 +602,8 @@ def guardar_checkout(id_actividad):
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
 
-    if not usuario_logueado():
-        flash("No tienes permisos para finalizar actividad de maquinaria.", "error")
+    if not es_operario():
+        flash("Solo los Operarios pueden finalizar una actividad.", "error")
         return redirect(url_for("dashboard"))
 
     try:
@@ -773,9 +764,7 @@ def api_guardarsolicitud():
         })
 
 
+
+
 if __name__ == "__main__":
     app.run(debug=True)
-<<<<<<< HEAD
-    
-=======
->>>>>>> e338179015068849a9cd650db910236b89f30ae0
