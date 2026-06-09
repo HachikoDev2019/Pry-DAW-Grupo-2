@@ -10,9 +10,13 @@
             <label>Máquina</label>
             <select name="maquina" required>
                 <option value="">Seleccione...</option>
-                <option value="Tractor 1 (ABC-123)">Tractor 1 (ABC-123)</option>
-                <option value="Cosechadora CAT (DEF-456)">Cosechadora CAT (DEF-456)</option>
-                <option value="Camión B (GHI-789)">Camión B (GHI-789)</option>
+                
+                {% for maq in maquinas %}
+                    <option value="{{ maq.nombre_codigo }} - {{ maq.tipo }}">
+                        {{ maq.nombre_codigo }} - {{ maq.tipo }} ({{ maq.marca or 'Sin marca' }})
+                    </option>
+                {% endfor %}
+                
             </select>
         </div>
 
