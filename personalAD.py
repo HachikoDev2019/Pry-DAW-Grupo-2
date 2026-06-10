@@ -128,21 +128,22 @@ def listar_personal():
 
 
 def guardar_face_descriptor(id_personal, descriptor_json):
+    conn = obtener_conexion()
+    if conn is None:
+        raise RuntimeError("No se pudo conectar a la base de datos.")
     try:
-        conn = obtener_conexion()
-        if conn is None:
-            return False
-        with conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    "UPDATE personal SET face_descriptor = %s WHERE id_personal = %s",
-                    (descriptor_json, id_personal)
-                )
-            conn.commit()
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE personal SET face_descriptor = %s WHERE id_personal = %s",
+                (descriptor_json, id_personal)
+            )
+        conn.commit()
         return True
-    except Exception as e:
-        print("Error en guardar_face_descriptor:", repr(e))
-        return False
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def obtener_todos_descriptores_activos():

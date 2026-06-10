@@ -819,13 +819,13 @@ def api_guardar_rostro():
     try:
         descriptor = request.json.get("descriptor", [])
         if len(descriptor) != 128:
-            return jsonify({"code": 0, "message": "Descriptor inválido."})
+            return jsonify({"code": 0, "message": f"Descriptor inválido: {len(descriptor)} valores (se esperan 128)."})
         descriptor_json = json.dumps(descriptor)
-        if guardar_face_descriptor(session["id_personal"], descriptor_json):
-            return jsonify({"code": 1, "message": "Rostro registrado correctamente."})
-        return jsonify({"code": 0, "message": "Error al guardar el rostro."})
+        guardar_face_descriptor(session["id_personal"], descriptor_json)
+        return jsonify({"code": 1, "message": "Rostro registrado correctamente."})
     except Exception as e:
-        return jsonify({"code": -1, "message": repr(e)})
+        print("ERROR /api/guardar_rostro:", repr(e))
+        return jsonify({"code": 0, "message": str(e)})
 
 
 @app.route("/api/login_facial", methods=["POST"])
