@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Cuenta - Azucarera Pomalca</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <style>
         .form-group-vertical input.invalid,
         .form-group-vertical select.invalid {
@@ -199,7 +200,40 @@
                 <span class="field-error" id="err-password2"></span>
             </div>
 
-            <button type="submit" class="btn-submit-block">
+            <!-- RECONOCIMIENTO FACIAL (OPCIONAL) -->
+            <div class="form-section-title" style="margin-top: 24px;">
+                Reconocimiento Facial
+                <span style="font-weight:400; color:#aaa; text-transform:none; letter-spacing:0; font-size:11px;"> — opcional, puedes hacerlo después</span>
+            </div>
+
+            <input type="hidden" id="face_descriptor" name="face_descriptor" value="">
+
+            <div id="faceRegZone" style="background:#f7faff; border:1.5px dashed #c8d6e8; border-radius:12px; padding:18px; text-align:center;">
+
+                <div id="facePreviewWrap" style="display:none; position:relative; width:100%; max-width:360px; height:240px; margin:0 auto 14px; border-radius:10px; overflow:hidden; background:#0d1520;">
+                    <video id="videoReg" autoplay muted playsinline style="position:absolute;width:100%;height:100%;object-fit:cover;"></video>
+                    <canvas id="canvasReg" style="position:absolute;width:100%;height:100%;z-index:2;"></canvas>
+                </div>
+
+                <p id="faceRegMsg" style="font-size:13px; color:#7a8fa6; margin-bottom:14px;">
+                    Registra tu rostro para poder iniciar sesión sin contraseña.
+                </p>
+
+                <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                    <button type="button" id="btnActivarReg" class="btn-face-login" style="width:auto; padding:10px 20px;" onclick="activarCamaraReg()">
+                        Activar cámara
+                    </button>
+                    <button type="button" id="btnCapturarReg" class="btn-capture" style="display:none;" onclick="capturarRostroReg()">
+                        Capturar rostro
+                    </button>
+                    <button type="button" id="btnResetReg" class="btn-stop-cam" style="display:none;" onclick="resetCamaraReg()">
+                        Reintentar
+                    </button>
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn-submit-block" style="margin-top:22px;">
                 Crear cuenta
             </button>
 
@@ -293,5 +327,123 @@ document.getElementById('frmRegistro').addEventListener('submit', function(e) {
 });
 </script>
 
+<script>
+// ---- FACE CAPTURE EN REGISTRO ----
+const REG_MODELS = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
+let regStream = null;
+let regPreviewInterval = null;
+let regModelsCargados = false;
+
+async function activarCamaraReg() {
+    const msg = document.getElementById('faceRegMsg');
+    const btnActivar = document.getElementById('btnActivarReg');
+    btnActivar.disabled = true;
+    msg.textContent = 'Cargando modelos de IA...';
+
+    try {
+        if (!regModelsCargados) {
+            await Promise.all([
+                faceapi.nets.tinyFaceDetector.loadFromUri(REG_MODELS),
+                faceapi.nets.faceLandmark68TinyNet.loadFromUri(REG_MODELS),
+                faceapi.nets.faceRecognitionNet.loadFromUri(REG_MODELS),
+            ]);
+            regModelsCargados = true;
+        }
+        msg.textContent = 'Activando cámara...';
+        regStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } });
+        const video = document.getElementById('videoReg');
+        video.srcObject = regStream;
+        await video.play();
+
+        document.getElementById('facePreviewWrap').style.display = 'block';
+        document.getElementById('btnActivarReg').style.display = 'none';
+        document.getElementById('btnCapturarReg').style.display = 'inline-block';
+        msg.textContent = 'Centra tu rostro y presiona "Capturar rostro".';
+        _iniciarPreviewReg();
+    } catch (err) {
+        msg.textContent = 'Error: ' + (err.message || 'Sin acceso a la cámara.');
+        btnActivar.disabled = false;
+    }
+}
+
+function _iniciarPreviewReg() {
+    const video = document.getElementById('videoReg');
+    const canvas = document.getElementById('canvasReg');
+    regPreviewInterval = setInterval(async () => {
+        if (!video.videoWidth) return;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const det = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks(true);
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (det) {
+            const { x, y, width, height } = det.detection.box;
+            ctx.strokeStyle = '#27ae60'; ctx.lineWidth = 3;
+            ctx.strokeRect(x, y, width, height);
+        } else {
+            ctx.strokeStyle = 'rgba(231,76,60,0.6)'; ctx.lineWidth = 2; ctx.setLineDash([8,5]);
+            ctx.strokeRect(canvas.width/2-90, canvas.height/2-115, 180, 230);
+            ctx.setLineDash([]);
+        }
+    }, 200);
+}
+
+async function capturarRostroReg() {
+    const video = document.getElementById('videoReg');
+    const msg = document.getElementById('faceRegMsg');
+    const btnCap = document.getElementById('btnCapturarReg');
+    btnCap.disabled = true;
+    msg.textContent = 'Analizando rostro...';
+
+    const det = await faceapi
+        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks(true)
+        .withFaceDescriptor();
+
+    if (!det) {
+        msg.textContent = 'No se detectó rostro. Centra tu cara e intenta de nuevo.';
+        btnCap.disabled = false;
+        return;
+    }
+
+    // Guardar descriptor en campo oculto
+    document.getElementById('face_descriptor').value = JSON.stringify(Array.from(det.descriptor));
+
+    // Congelar cámara y mostrar éxito
+    clearInterval(regPreviewInterval);
+    if (regStream) regStream.getTracks().forEach(t => t.stop());
+    regStream = null;
+
+    const canvas = document.getElementById('canvasReg');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#27ae60'; ctx.lineWidth = 4;
+    const { x, y, width, height } = det.detection.box;
+    ctx.strokeRect(x, y, width, height);
+
+    btnCap.style.display = 'none';
+    document.getElementById('btnResetReg').style.display = 'inline-block';
+    msg.style.color = '#27ae60';
+    msg.textContent = 'Rostro capturado correctamente. Ya puedes crear tu cuenta.';
+}
+
+function resetCamaraReg() {
+    document.getElementById('face_descriptor').value = '';
+    document.getElementById('facePreviewWrap').style.display = 'none';
+    document.getElementById('btnActivarReg').style.display = 'inline-block';
+    document.getElementById('btnActivarReg').disabled = false;
+    document.getElementById('btnCapturarReg').style.display = 'none';
+    document.getElementById('btnCapturarReg').disabled = false;
+    document.getElementById('btnResetReg').style.display = 'none';
+    const msg = document.getElementById('faceRegMsg');
+    msg.style.color = '#7a8fa6';
+    msg.textContent = 'Registra tu rostro para poder iniciar sesión sin contraseña.';
+    clearInterval(regPreviewInterval);
+    if (regStream) regStream.getTracks().forEach(t => t.stop());
+    regStream = null;
+}
+
+window.addEventListener('beforeunload', () => { if (regStream) regStream.getTracks().forEach(t => t.stop()); });
+</script>
 </body>
 </html>

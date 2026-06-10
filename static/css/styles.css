@@ -810,4 +810,548 @@ body.login-body, body:has(.card) {
 .logout-btn:hover {
     text-decoration: underline;
     color: #c0392b;
+<<<<<<< Updated upstream
 }
+=======
+}
+
+/* ==========================================================================
+   CHATBOT WIDGET
+   ========================================================================== */
+
+#chatbot-toggle {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #5b7fb1;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 4px 18px rgba(91,127,177,0.45);
+    z-index: 9000;
+    transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#chatbot-toggle:hover,
+#chatbot-toggle.chatbot-active {
+    background: #3d5a82;
+    transform: scale(1.08);
+    box-shadow: 0 6px 22px rgba(61,90,130,0.50);
+}
+
+#chatbot-panel {
+    position: fixed;
+    bottom: 96px;
+    right: 28px;
+    width: 340px;
+    max-height: 520px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(30,42,58,0.16);
+    display: flex;
+    flex-direction: column;
+    z-index: 8999;
+    overflow: hidden;
+    transform: translateY(20px) scale(0.96);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+#chatbot-panel.chatbot-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+}
+
+.chatbot-header {
+    background: #5b7fb1;
+    color: #ffffff;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.chatbot-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chatbot-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.chatbot-name {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.chatbot-status {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.chatbot-close {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+}
+
+.chatbot-close:hover { opacity: 1; }
+
+.chatbot-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-behavior: smooth;
+}
+
+.chatbot-msg {
+    display: flex;
+    max-width: 90%;
+}
+
+.msg-bot  { align-self: flex-start; }
+.msg-user { align-self: flex-end; }
+
+.chatbot-bubble {
+    padding: 9px 13px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.msg-bot .chatbot-bubble {
+    background: #f0f4f9;
+    color: #2d3436;
+    border-bottom-left-radius: 4px;
+}
+
+.msg-user .chatbot-bubble {
+    background: #5b7fb1;
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+}
+
+/* Typing dots */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 14px;
+}
+
+.typing-indicator span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #5b7fb1;
+    animation: chatbot-bounce 1s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.30s; }
+
+@keyframes chatbot-bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+    40%            { transform: translateY(-7px); opacity: 1; }
+}
+
+/* Quick replies */
+.chatbot-quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 12px 2px;
+    flex-shrink: 0;
+}
+
+.quick-reply-chip {
+    background: #eef2f8;
+    color: #3d5a82;
+    border: 1px solid #c8d6e8;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.quick-reply-chip:hover {
+    background: #5b7fb1;
+    color: #ffffff;
+    border-color: #5b7fb1;
+}
+
+/* Input area */
+.chatbot-input-area {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 10px 12px 12px;
+    border-top: 1px solid #eeeeeee;
+    flex-shrink: 0;
+    background: #ffffff;
+}
+
+#chatbot-input {
+    flex: 1;
+    resize: none;
+    border: 1px solid #d0dce8;
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    max-height: 90px;
+    overflow-y: auto;
+}
+
+#chatbot-input:focus { border-color: #5b7fb1; }
+
+#chatbot-input:disabled {
+    background: #f7f9fb;
+    color: #aaa;
+}
+
+#chatbot-send {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #5b7fb1;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+#chatbot-send:hover:not(:disabled) { background: #3d5a82; }
+#chatbot-send:disabled { background: #b0c4de; cursor: not-allowed; }
+
+@media (max-width: 420px) {
+    #chatbot-panel {
+        width: calc(100vw - 20px);
+        right: 10px;
+        bottom: 80px;
+    }
+    #chatbot-toggle { right: 16px; bottom: 16px; }
+}
+
+/* ==========================================================================
+   RECONOCIMIENTO FACIAL — LOGIN Y REGISTRO
+   ========================================================================== */
+
+/* Divisor "o" entre form y botón facial */
+.face-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 16px;
+    color: #b0bec5;
+    font-size: 13px;
+    font-weight: 600;
+}
+.face-divider::before,
+.face-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e0e6ed;
+}
+
+/* Botón facial en login */
+.btn-face-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 13px;
+    background: #ffffff;
+    color: #3d5a82;
+    border: 1.5px solid #c8d6e8;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.btn-face-login:hover {
+    background: #eef3fb;
+    border-color: #5b7fb1;
+    box-shadow: 0 4px 12px rgba(91,127,177,0.18);
+}
+.btn-face-login:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Modal facial */
+#modalFace {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 36, 0.75);
+    z-index: 6000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+#modalFace.activo {
+    display: flex;
+}
+
+.face-modal-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 28px 28px 24px;
+    width: 400px;
+    max-width: 95vw;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    animation: faceModalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes faceModalIn {
+    from { opacity: 0; transform: scale(0.88) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.face-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.face-modal-header h2 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1e2a3a;
+}
+.face-modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #8a99aa;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+}
+.face-modal-close:hover {
+    background: #f0f4f9;
+    color: #3d5a82;
+}
+
+.face-modal-hint {
+    font-size: 12.5px;
+    color: #8a99aa;
+    margin-bottom: 16px;
+}
+
+/* Contenedor del scanner */
+.face-scanner-wrap {
+    position: relative;
+    width: 320px;
+    height: 240px;
+    margin: 0 auto 18px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #0d1520;
+}
+.face-scanner-wrap video,
+.face-scanner-wrap canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.face-scanner-wrap canvas { z-index: 2; }
+
+/* Línea de escaneo animada */
+.face-scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #27ae60 40%, #2ecc71 50%, #27ae60 60%, transparent 100%);
+    z-index: 3;
+    animation: scanLine 2.5s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.7);
+}
+@keyframes scanLine {
+    0%   { top: 5%; opacity: 0; }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { top: 95%; opacity: 0; }
+}
+
+/* Esquinas decorativas del frame */
+.face-corner {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    z-index: 4;
+    border-color: #5b7fb1;
+    border-style: solid;
+}
+.face-corner.tl { top: 10px; left: 10px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+.face-corner.tr { top: 10px; right: 10px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+.face-corner.bl { bottom: 10px; left: 10px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+.face-corner.br { bottom: 10px; right: 10px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+/* Texto de estado */
+.face-status-text {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #5b7fb1;
+    min-height: 20px;
+    margin-bottom: 18px;
+    transition: color 0.3s;
+}
+.face-status-text.ok  { color: #27ae60; }
+.face-status-text.err { color: #e74c3c; }
+
+/* Botón cancelar en modal */
+.btn-face-cancel {
+    background: #f0f4f9;
+    color: #5b7fb1;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 28px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-face-cancel:hover { background: #dce8f5; }
+
+/* ---- PÁGINA REGISTRO DE ROSTRO ---- */
+.face-reg-card {
+    max-width: 560px;
+    margin: 20px auto;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 36px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    text-align: center;
+}
+.face-reg-card h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1e2a3a;
+    margin-bottom: 6px;
+}
+.face-reg-card .subtitle {
+    font-size: 13.5px;
+    color: #8a99aa;
+    margin-bottom: 24px;
+}
+.face-reg-scanner {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    height: 300px;
+    margin: 0 auto 20px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #0d1520;
+}
+.face-reg-scanner video,
+.face-reg-scanner canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.face-reg-scanner canvas { z-index: 2; }
+.face-reg-scanner .face-scan-line { position: absolute; }
+
+.face-reg-status {
+    font-size: 14px;
+    font-weight: 600;
+    color: #5b7fb1;
+    min-height: 22px;
+    margin-bottom: 20px;
+}
+.face-reg-status.ok  { color: #27ae60; }
+.face-reg-status.err { color: #e74c3c; }
+
+.face-reg-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-capture {
+    background: #27ae60;
+    color: #ffffff;
+    border: none;
+    border-radius: 9px;
+    padding: 13px 28px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+.btn-capture:hover { background: #219a52; transform: translateY(-1px); }
+.btn-capture:disabled { background: #95c9a9; cursor: not-allowed; transform: none; }
+
+.btn-stop-cam {
+    background: #f0f4f9;
+    color: #5b7fb1;
+    border: none;
+    border-radius: 9px;
+    padding: 13px 22px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-stop-cam:hover { background: #dce8f5; }
+>>>>>>> Stashed changes
