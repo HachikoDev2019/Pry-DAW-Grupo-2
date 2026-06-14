@@ -445,5 +445,6 @@ function resetCamaraReg() {
 
 window.addEventListener('beforeunload', () => { if (regStream) regStream.getTracks().forEach(t => t.stop()); });
 </script>
+<script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 </body>
 </html>

@@ -109,3 +109,14 @@ VALUES
 ('Carlos Ramirez', 'Solicitud de repuestos para tractor TR-001',         'Campo',        'Alta',  'Pendiente',   NULL),
 ('Maria Torres',   'Compra de implementos de seguridad industrial',       'Fábrica',      'Media', 'En revisión', 'Validando presupuesto'),
 ('Luis Fernandez', 'Mantenimiento preventivo de caldera CAL-003',         'Mantenimiento','Alta',  'Aprobado',    'Programado para mañana');
+
+
+
+-- Alterar la tabla personal para el inicio de sesión con reconocimiento facial
+
+ALTER TABLE personal ADD COLUMN face_descriptor TEXT;
+
+
+
+-- =========================================================
+-- para instalar los requeriments:  pip install -r requirements.txt
