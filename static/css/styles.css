@@ -1072,3 +1072,94 @@ body.login-body, body:has(.card) {
     }
     #chatbot-toggle { right: 16px; bottom: 16px; }
 }
+
+/* ==========================================================================
+   MENÚ DESPLEGABLE DE ACCIONES (gestion_solicitudes)
+   ========================================================================== */
+
+.acciones-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.acciones-btn {
+    background: #5b7fb1;
+    color: #ffffff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.acciones-btn:hover {
+    background: #3d5a82;
+}
+
+.acciones-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    background: #ffffff;
+    border: 1px solid #dde3ec;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    min-width: 200px;
+    z-index: 999;
+    overflow: hidden;
+}
+
+.acciones-menu.open {
+    display: block;
+}
+
+.acciones-menu a,
+.acciones-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #333333;
+    background: none;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    font-weight: 600;
+    transition: background 0.15s, color 0.15s;
+}
+
+.acciones-menu a:hover,
+.acciones-menu button:hover {
+    background: #eef3fb;
+    color: #5b7fb1;
+}
+
+.acciones-menu .menu-divider {
+    height: 1px;
+    background: #eeeeee;
+    margin: 4px 0;
+}
+
+.acciones-menu .menu-disabled {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #aaaaaa;
+    cursor: default;
+    font-weight: 600;
+}
+/* Fix dropdown en tabla */
+.table-container { overflow: visible; }

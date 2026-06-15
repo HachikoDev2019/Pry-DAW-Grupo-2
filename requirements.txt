@@ -1,5 +1,4 @@
 Flask
 PyMySQL
+reportlab==3.6.13
 mysql-connector-python
-anthropic
-python-dotenv

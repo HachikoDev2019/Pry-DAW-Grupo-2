@@ -4,6 +4,7 @@
 
 {% block content %}
 
+
 <section class="page-header">
     <h1>Gestión de solicitudes</h1>
     <p>Listado general de solicitudes registradas por los trabajadores.</p>
@@ -65,7 +66,7 @@
                     <th>Estado</th>
                     <th>Comentario</th>
                     <th>Fecha</th>
-                    <th>Actualizar</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
 
@@ -85,14 +86,46 @@
                         </td>
                         <td>{{ solicitud.comentario or 'Sin comentario' }}</td>
                         <td>{{ solicitud.fecha_registro }}</td>
+
+                        {# ── Menú desplegable de acciones ── #}
                         <td>
-                            <button
-                                type="button"
-                                class="btn-small"
-                                onclick="abrirModalActualizar('{{ solicitud.id_solicitud }}', '{{ solicitud.estado }}', `{{ solicitud.comentario or '' }}`)"
-                            >
-                                Actualizar
-                            </button>
+                            <div class="acciones-wrapper">
+                                <button class="acciones-btn" onclick="toggleMenu(event, 'menu-{{ solicitud.id_solicitud }}')">
+                                    Acciones ▾
+                                </button>
+                                <div class="acciones-menu" id="menu-{{ solicitud.id_solicitud }}">
+
+                                    {# Actualizar estado #}
+                                    <button onclick="cerrarMenus(); abrirModalActualizar('{{ solicitud.id_solicitud }}', '{{ solicitud.estado }}', `{{ solicitud.comentario or '' }}`)">
+                                    Actualizar estado
+                                    </button>
+
+                                    <div class="menu-divider"></div>
+
+                                    {# Descargar PDF #}
+                                    {% if solicitud.estado == 'Aprobado' and solicitud.ruta_pdf %}
+                                        <a href="/{{ solicitud.ruta_pdf }}" download>
+                                        Descargar PDF
+                                        </a>
+                                    {% else %}
+                                        <span class="menu-disabled">Descargar PDF (no disponible)</span>
+                                    {% endif %}
+
+                                    {# Subir / Ver PDF firmado #}
+                                    {% if solicitud.ruta_pdf_firmado %}
+                                        <a href="/{{ solicitud.ruta_pdf_firmado }}" download>
+                                        Ver PDF firmado
+                                        </a>
+                                    {% elif solicitud.estado == 'Aprobado' and solicitud.ruta_pdf %}
+                                        <button onclick="cerrarMenus(); abrirModalSubirFirmado('{{ solicitud.id_solicitud }}')">
+                                        Subir PDF firmado
+                                        </button>
+                                    {% else %}
+                                        <span class="menu-disabled">Subir PDF firmado (no disponible)</span>
+                                    {% endif %}
+
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -106,6 +139,7 @@
     </div>
 </section>
 
+{# ── Modal: Actualizar estado ── #}
 <div class="modal-overlay" id="modalActualizarSolicitud">
     <div class="modal">
         <h2>Actualizar solicitud</h2>
@@ -136,7 +170,46 @@
     </div>
 </div>
 
+{# ── Modal: Subir PDF firmado con Certezia ── #}
+<div class="modal-overlay" id="modalSubirFirmado">
+    <div class="modal">
+        <h2>Subir PDF firmado</h2>
+        <p style="margin-bottom: 1rem; color: #555; font-size: 0.95em;">
+            Descarga el PDF, fírmalo con la app <strong>Certezia Ciudadanos</strong> usando tu DNIe, y luego súbelo aquí.
+        </p>
+
+        <form id="subirFirmadoForm" method="POST" enctype="multipart/form-data">
+            <div class="form-group full">
+                <label>Seleccionar PDF firmado</label>
+                <input type="file" name="pdf_firmado" accept=".pdf" required>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="cerrarModalSubirFirmado()">Cancelar</button>
+                <button type="submit" class="btn-primary">Subir PDF firmado</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+// ── Manejo del menú desplegable ──
+function toggleMenu(event, menuId) {
+    event.stopPropagation();
+    const menu = document.getElementById(menuId);
+    const estaAbierto = menu.classList.contains('open');
+    cerrarMenus();
+    if (!estaAbierto) menu.classList.add('open');
+}
+
+function cerrarMenus() {
+    document.querySelectorAll('.acciones-menu.open').forEach(m => m.classList.remove('open'));
+}
+
+// Cerrar menú al hacer clic fuera
+document.addEventListener('click', cerrarMenus);
+
+// ── Modal actualizar estado ──
 function abrirModalActualizar(id, estado, comentario) {
     document.getElementById("id_solicitud").value = id;
     document.getElementById("estado_solicitud").value = estado;
@@ -158,8 +231,17 @@ function confirmarActualizarSolicitud() {
         }
     });
 }
+
+// ── Modal subir PDF firmado ──
+function abrirModalSubirFirmado(idSolicitud) {
+    const form = document.getElementById("subirFirmadoForm");
+    form.action = "/subir_pdf_firmado/" + idSolicitud;
+    document.getElementById("modalSubirFirmado").classList.add("open");
+}
+
+function cerrarModalSubirFirmado() {
+    document.getElementById("modalSubirFirmado").classList.remove("open");
+}
 </script>
-
-
 
 {% endblock %}

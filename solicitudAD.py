@@ -14,7 +14,7 @@ def insertar_solicitud(solicitud):
     try:
         conn = obtener_conexion()
         if conn is None:
-            return False
+            return None
         with conn:
             with conn.cursor() as cursor:
                 sql = """
@@ -28,11 +28,12 @@ def insertar_solicitud(solicitud):
                     solicitud.area,
                     solicitud.prioridad
                 ))
+                id_solicitud = cursor.lastrowid
             conn.commit()
-        return True
+        return id_solicitud
     except Exception as e:
         print("Error al insertar solicitud:", repr(e))
-        return False
+        return None
 
 
 def listar_mis_solicitudes(trabajador):
@@ -50,11 +51,11 @@ def listar_mis_solicitudes(trabajador):
                 """
                 cursor.execute(sql, (trabajador,))
                 return cursor.fetchall()
-
     except Exception as e:
         print("Error al listar solicitudes:", repr(e))
         return []
-    
+
+
 def listar_todas_solicitudes(estado=None, area=None, prioridad=None):
     try:
         conn = obtener_conexion()
@@ -62,11 +63,7 @@ def listar_todas_solicitudes(estado=None, area=None, prioridad=None):
             return []
         with conn:
             with conn.cursor() as cursor:
-                sql = """
-                    SELECT *
-                    FROM solicitudes
-                    WHERE 1 = 1
-                """
+                sql = "SELECT * FROM solicitudes WHERE 1 = 1"
                 params = []
                 if estado:
                     sql += " AND estado = %s"
@@ -142,4 +139,50 @@ def actualizar_solicitud_operario(id_solicitud, descripcion, area, prioridad):
         return True
     except Exception as e:
         print("Error al actualizar solicitud:", repr(e))
+        return False
+
+
+def actualizar_ruta_pdf(id_solicitud, ruta_pdf):
+    """Guarda la ruta del PDF generado automáticamente al aprobar"""
+    try:
+        conn = obtener_conexion()
+        if conn is None:
+            return False
+        with conn:
+            with conn.cursor() as cursor:
+                sql = """
+                    UPDATE solicitudes
+                    SET ruta_pdf = %s
+                    WHERE id_solicitud = %s
+                """
+                cursor.execute(sql, (ruta_pdf, id_solicitud))
+            conn.commit()
+        return True
+    except Exception as e:
+        print("Error al guardar ruta PDF:", repr(e))
+        return False
+
+
+# =========================================================
+# NUEVA FUNCIÓN — guarda el PDF firmado subido por el supervisor
+# =========================================================
+
+def actualizar_ruta_pdf_firmado(id_solicitud, ruta_pdf_firmado):
+    """Guarda la ruta del PDF firmado con Certezia subido por el supervisor"""
+    try:
+        conn = obtener_conexion()
+        if conn is None:
+            return False
+        with conn:
+            with conn.cursor() as cursor:
+                sql = """
+                    UPDATE solicitudes
+                    SET ruta_pdf_firmado = %s
+                    WHERE id_solicitud = %s
+                """
+                cursor.execute(sql, (ruta_pdf_firmado, id_solicitud))
+            conn.commit()
+        return True
+    except Exception as e:
+        print("Error al guardar ruta PDF firmado:", repr(e))
         return False

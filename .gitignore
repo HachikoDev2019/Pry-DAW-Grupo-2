@@ -49,3 +49,6 @@ htmlcov/
 # Archivos compilados
 build/
 dist/
+
+static/documentos/solicitudes/*.pdf
+static/documentos/firmados/*.pdf*

@@ -1,4 +1,7 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from werkzeug.utils import secure_filename
+from pdf_generator import generar_pdf_solicitud
 
 from maquinariaAD import clsMaquinaria, insertar_maquinaria, listar_maquinarias, actualizar_maquinaria, eliminar_maquinaria, obtener_maquinaria
 
@@ -9,7 +12,9 @@ from solicitudAD import (
     listar_todas_solicitudes,
     actualizar_solicitud,
     eliminar_solicitud,
-    actualizar_solicitud_operario
+    actualizar_solicitud_operario,
+    actualizar_ruta_pdf,
+    actualizar_ruta_pdf_firmado   # NUEVO
 )
 
 from personalAD import (
@@ -31,6 +36,13 @@ from actividadAD import (
 
 app = Flask(__name__)
 app.secret_key = "pomalca_secret_key"
+
+# Extensiones permitidas para el PDF firmado
+EXTENSIONES_PERMITIDAS = {"pdf"}
+
+
+def extension_permitida(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in EXTENSIONES_PERMITIDAS
 
 
 # =========================================================
@@ -152,17 +164,7 @@ def guardar_personal():
         return redirect(url_for("registro"))
 
     try:
-        personal = clsPersonal(
-            dni,
-            nombres,
-            apellidos,
-            telefono,
-            correo,
-            tipo_usuario,
-            area,
-            fecha_ingreso,
-            password
-        )
+        personal = clsPersonal(dni, nombres, apellidos, telefono, correo, tipo_usuario, area, fecha_ingreso, password)
 
         if insertar_personal(personal):
             flash("Cuenta creada correctamente. Ya puedes iniciar sesión.", "success")
@@ -177,7 +179,7 @@ def guardar_personal():
 
 
 # =========================================================
-# MAQUINARIA - ADMINISTRADOR
+# MAQUINARIA
 # =========================================================
 
 @app.route("/registro_maquinaria")
@@ -185,18 +187,16 @@ def registro_maquinaria():
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
     if not es_supervisor_o_admin():
         flash("No tienes permisos para registrar maquinaria.", "error")
         return redirect(url_for("dashboard"))
-
     return render_template("maquinaria/registro_maquinaria.html")
 
-@app.route("/api_listarmaquinarias", methods=['POST'])
+
+@app.route("/api_listarmaquinarias", methods=["POST"])
 def api_listarmaquinarias():
     try:
-        resultado = listar_maquinarias()
-        return jsonify(resultado)
+        return jsonify(listar_maquinarias())
     except Exception as e:
         return jsonify({"error": repr(e)})
 
@@ -206,11 +206,9 @@ def guardar_maquinaria():
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
     if not es_supervisor_o_admin():
         flash("No tienes permisos para registrar maquinaria.", "error")
         return redirect(url_for("dashboard"))
-
     try:
         maquinaria = clsMaquinaria(
             request.form["nombre_codigo"],
@@ -221,53 +219,26 @@ def guardar_maquinaria():
             request.form["estado"],
             request.form["observaciones"]
         )
-
         if insertar_maquinaria(maquinaria):
             flash("Maquinaria registrada correctamente.", "success")
             return redirect(url_for("mis_maquinarias"))
-
         flash("Error al registrar la maquinaria.", "error")
         return redirect(url_for("registro_maquinaria"))
-
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("registro_maquinaria"))
+
 
 @app.route("/api_guardar_maquinaria", methods=["POST"])
 def api_guardar_maquinaria():
     try:
         data = request.json
-
-        objMaquinaria = clsMaquinaria(
-            0,
-            data["nombre_codigo"],
-            data["tipo"],
-            data["marca"],
-            data["modelo"],
-            data["area"],
-            data["estado"],
-            data["observaciones"]
-        )
-
+        objMaquinaria = clsMaquinaria(0, data["nombre_codigo"], data["tipo"], data["marca"], data["modelo"], data["area"], data["estado"], data["observaciones"])
         if insertar_maquinaria(objMaquinaria):
-            return jsonify({
-                "code": 1,
-                "data": {},
-                "message": "Maquinaria insertada correctamente"
-            })
-
-        return jsonify({
-            "code": 0,
-            "data": {},
-            "message": "Error al insertar maquinaria"
-        })
-
+            return jsonify({"code": 1, "data": {}, "message": "Maquinaria insertada correctamente"})
+        return jsonify({"code": 0, "data": {}, "message": "Error al insertar maquinaria"})
     except Exception as e:
-        return jsonify({
-            "code": -1,
-            "data": {},
-            "message": repr(e)
-        })
+        return jsonify({"code": -1, "data": {}, "message": repr(e)})
 
 
 @app.route("/mis_maquinarias")
@@ -275,15 +246,12 @@ def mis_maquinarias():
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
     if not es_supervisor_o_admin():
         flash("No tienes permisos para ver maquinaria.", "error")
         return redirect(url_for("dashboard"))
-
     try:
         maquinarias = listar_maquinarias()
         return render_template("maquinaria/mis_maquinarias.html", maquinarias=maquinarias)
-
     except Exception as e:
         flash(f"Error al cargar el inventario: {repr(e)}", "error")
         return redirect(url_for("dashboard"))
@@ -291,59 +259,31 @@ def mis_maquinarias():
 
 @app.route("/actualizar_maquinaria", methods=["POST"])
 def actualizar_maquinaria_web():
-
     try:
-
-        resultado = actualizar_maquinaria(
-            request.form["id_maquinaria"],
-            request.form["estado"]
-        )
-
-        if resultado:
-            flash("Estado actualizado correctamente.", "success")
-        else:
-            flash("No se pudo actualizar.", "error")
-
+        resultado = actualizar_maquinaria(request.form["id_maquinaria"], request.form["estado"])
+        flash("Estado actualizado correctamente." if resultado else "No se pudo actualizar.", "success" if resultado else "error")
     except Exception as e:
         flash(f"Error: {repr(e)}", "error")
-
     return redirect(url_for("mis_maquinarias"))
+
+
 @app.route("/eliminar_maquinaria", methods=["POST"])
 def eliminar_maquinaria_web():
-
     try:
-
         id_maquinaria = request.form["id_maquinaria"]
-
         maquinaria = obtener_maquinaria(id_maquinaria)
-
         if not maquinaria:
             flash("La maquinaria no existe.", "error")
             return redirect(url_for("mis_maquinarias"))
-
         if maquinaria["estado"] == "Operativo":
-            flash(
-                "No se puede eliminar una maquinaria operativa.",
-                "error"
-            )
+            flash("No se puede eliminar una maquinaria operativa.", "error")
             return redirect(url_for("mis_maquinarias"))
-
-        if eliminar_maquinaria(id_maquinaria):
-            flash(
-                "Maquinaria eliminada correctamente.",
-                "success"
-            )
-        else:
-            flash(
-                "No se pudo eliminar la maquinaria.",
-                "error"
-            )
-
+        flash("Maquinaria eliminada correctamente." if eliminar_maquinaria(id_maquinaria) else "No se pudo eliminar la maquinaria.", "success" if eliminar_maquinaria(id_maquinaria) else "error")
     except Exception as e:
         flash(f"Error: {repr(e)}", "error")
-
     return redirect(url_for("mis_maquinarias"))
-# =========================================================
+
+
 # =========================================================
 # SOLICITUDES - OPERARIO
 # =========================================================
@@ -353,15 +293,10 @@ def registrar_solicitud():
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
     if not es_operario():
         flash("No tienes permisos para registrar solicitudes.", "error")
         return redirect(url_for("dashboard"))
-
-    return render_template(
-        "solicitudes/registrar_solicitud.html",
-        trabajador=nombre_usuario_actual()
-    )
+    return render_template("solicitudes/registrar_solicitud.html", trabajador=nombre_usuario_actual())
 
 
 @app.route("/guardar_solicitud", methods=["POST"])
@@ -369,11 +304,9 @@ def guardar_solicitud():
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
     if not es_operario():
         flash("No tienes permisos para registrar solicitudes.", "error")
         return redirect(url_for("dashboard"))
-
     try:
         solicitud = clsSolicitud(
             nombre_usuario_actual(),
@@ -381,14 +314,13 @@ def guardar_solicitud():
             request.form["area"],
             request.form["prioridad"]
         )
-
-        if insertar_solicitud(solicitud):
+        # Solo se guarda en BD — el PDF se genera al aprobar
+        id_solicitud = insertar_solicitud(solicitud)
+        if id_solicitud:
             flash("Solicitud registrada correctamente.", "success")
         else:
             flash("Error al registrar la solicitud.", "error")
-
         return redirect(url_for("mis_solicitudes"))
-
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("registrar_solicitud"))
@@ -399,20 +331,13 @@ def mis_solicitudes():
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
     if not es_operario():
         flash("No tienes permisos para ver solicitudes.", "error")
         return redirect(url_for("dashboard"))
-
     solicitudes = listar_mis_solicitudes(nombre_usuario_actual())
-
-    return render_template(
-        "solicitudes/mis_solicitudes.html",
-        solicitudes=solicitudes
-    )
+    return render_template("solicitudes/mis_solicitudes.html", solicitudes=solicitudes)
 
 
-# =========================================================
 # =========================================================
 # SOLICITUDES - SUPERVISOR / ADMINISTRADOR
 # =========================================================
@@ -422,7 +347,6 @@ def gestion_solicitudes():
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
     if not es_supervisor_o_admin():
         flash("No tienes permisos para acceder a esta sección.", "error")
         return redirect(url_for("dashboard"))
@@ -430,7 +354,6 @@ def gestion_solicitudes():
     estado = request.args.get("estado")
     area = request.args.get("area")
     prioridad = request.args.get("prioridad")
-
     solicitudes = listar_todas_solicitudes(estado, area, prioridad)
 
     return render_template(
@@ -447,7 +370,6 @@ def actualizar_solicitud_estado():
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
     if not es_supervisor_o_admin():
         flash("No tienes permisos para actualizar solicitudes.", "error")
         return redirect(url_for("dashboard"))
@@ -458,7 +380,29 @@ def actualizar_solicitud_estado():
         comentario = request.form["comentario"]
 
         if actualizar_solicitud(id_solicitud, estado, comentario):
-            flash("Solicitud actualizada correctamente.", "success")
+
+            # =====================================================
+            # NUEVO: generar PDF automáticamente al aprobar
+            # =====================================================
+            if estado == "Aprobado":
+                # Necesitamos los datos de la solicitud para el PDF
+                solicitudes = listar_todas_solicitudes()
+                solicitud = next((s for s in solicitudes if str(s["id_solicitud"]) == str(id_solicitud)), None)
+
+                if solicitud:
+                    ruta_pdf = generar_pdf_solicitud(
+                        id_solicitud,
+                        solicitud["trabajador"],
+                        solicitud["descripcion"],
+                        solicitud["area"],
+                        solicitud["prioridad"]
+                    )
+                    actualizar_ruta_pdf(id_solicitud, ruta_pdf)
+                    flash("Solicitud aprobada y PDF generado correctamente.", "success")
+                else:
+                    flash("Solicitud aprobada, pero no se pudo generar el PDF.", "warning")
+            else:
+                flash("Solicitud actualizada correctamente.", "success")
         else:
             flash("Error al actualizar la solicitud.", "error")
 
@@ -474,7 +418,6 @@ def actualizar_solicitud_operario_route():
     if not usuario_logueado() or not es_operario():
         flash("No tienes permisos para actualizar solicitudes.", "error")
         return redirect(url_for("mis_solicitudes"))
-
     try:
         id_solicitud = request.form["id_solicitud"]
         descripcion = request.form.get("descripcion", "").strip()
@@ -485,13 +428,8 @@ def actualizar_solicitud_operario_route():
             flash("Complete todos los campos obligatorios.", "error")
             return redirect(url_for("mis_solicitudes"))
 
-        if actualizar_solicitud_operario(id_solicitud, descripcion, area, prioridad):
-            flash("Solicitud actualizada correctamente.", "success")
-        else:
-            flash("Error al actualizar la solicitud.", "error")
-
+        flash("Solicitud actualizada correctamente." if actualizar_solicitud_operario(id_solicitud, descripcion, area, prioridad) else "Error al actualizar la solicitud.", "success" if actualizar_solicitud_operario(id_solicitud, descripcion, area, prioridad) else "error")
         return redirect(url_for("mis_solicitudes"))
-
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("mis_solicitudes"))
@@ -502,25 +440,60 @@ def eliminar_solicitud_web():
     if not usuario_logueado() or not es_operario():
         flash("No tienes permisos para eliminar solicitudes.", "error")
         return redirect(url_for("mis_solicitudes"))
-
     try:
         id_solicitud = request.form.get("id_solicitud")
-        
-        if eliminar_solicitud(id_solicitud):
-            flash("Solicitud eliminada correctamente.", "success")
-        else:
-            flash("Error al eliminar la solicitud.", "error")
-
+        flash("Solicitud eliminada correctamente." if eliminar_solicitud(id_solicitud) else "Error al eliminar la solicitud.", "success" if eliminar_solicitud(id_solicitud) else "error")
         return redirect(url_for("mis_solicitudes"))
-
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("mis_solicitudes"))
 
 
 # =========================================================
+# NUEVO: Subir PDF firmado con Certezia (supervisor)
 # =========================================================
-# ACTIVIDAD MAQUINARIA - OPERARIO / SUPERVISOR / ADMINISTRADOR
+
+@app.route("/subir_pdf_firmado/<int:id_solicitud>", methods=["POST"])
+def subir_pdf_firmado(id_solicitud):
+    if not usuario_logueado():
+        flash("Debe iniciar sesión.", "error")
+        return redirect(url_for("login"))
+    if not es_supervisor_o_admin():
+        flash("No tienes permisos para subir documentos firmados.", "error")
+        return redirect(url_for("dashboard"))
+
+    archivo = request.files.get("pdf_firmado")
+
+    if not archivo or archivo.filename == "":
+        flash("No se seleccionó ningún archivo.", "error")
+        return redirect(url_for("gestion_solicitudes"))
+
+    if not extension_permitida(archivo.filename):
+        flash("Solo se permiten archivos PDF.", "error")
+        return redirect(url_for("gestion_solicitudes"))
+
+    try:
+        carpeta = "static/documentos/firmados"
+        if not os.path.exists(carpeta):
+            os.makedirs(carpeta)
+
+        nombre_archivo = f"solicitud_{id_solicitud}_firmado.pdf"
+        ruta = os.path.join(carpeta, nombre_archivo)
+        archivo.save(ruta)
+
+        if actualizar_ruta_pdf_firmado(id_solicitud, ruta):
+            flash("PDF firmado subido correctamente.", "success")
+        else:
+            flash("Error al guardar la ruta del PDF firmado.", "error")
+
+    except Exception as e:
+        flash(f"Error inesperado: {repr(e)}", "error")
+
+    return redirect(url_for("gestion_solicitudes"))
+
+
+# =========================================================
+# ACTIVIDAD MAQUINARIA
 # =========================================================
 
 @app.route("/actividad_maquinaria")
@@ -528,7 +501,6 @@ def actividad_maquinaria():
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
     actividades = listar_actividades_activas()
     return render_template("actividad/listado.html", actividades=actividades)
 
@@ -538,14 +510,11 @@ def checkin_actividad():
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
     if not es_operario():
         flash("Solo los Operarios pueden hacer el Check-In de maquinaria.", "error")
         return redirect(url_for("actividad_maquinaria"))
-
     todas_las_maquinas = listar_maquinarias()
-    maquinas_disponibles = [m for m in todas_las_maquinas if m['estado'] == 'Operativo']
-
+    maquinas_disponibles = [m for m in todas_las_maquinas if m["estado"] == "Operativo"]
     return render_template("actividad/checkin.html", maquinas=maquinas_disponibles)
 
 
@@ -554,12 +523,9 @@ def guardar_checkin():
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
-    # ¡CANDADO AQUÍ TAMBIÉN!
     if not es_operario():
         flash("Solo los Operarios pueden iniciar actividad.", "error")
         return redirect(url_for("dashboard"))
-
     try:
         actividad = clsActividad(
             request.form["maquina"],
@@ -567,31 +533,25 @@ def guardar_checkin():
             request.form["combustible_inicial"],
             request.form["horas_estimadas"]
         )
-
         id_viaje = iniciar_actividad(actividad)
-
         if id_viaje:
             flash("Jornada iniciada correctamente.", "success")
             return redirect(url_for("monitoreo_activo", id_actividad=id_viaje))
-
         flash("Error al iniciar la jornada.", "error")
         return redirect(url_for("checkin_actividad"))
-
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("checkin_actividad"))
+
 
 @app.route("/actividad/activo/<int:id_actividad>")
 def monitoreo_activo(id_actividad):
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
     actividad = obtener_actividad(id_actividad)
-
     if actividad:
         return render_template("actividad/checkout.html", actividad=actividad)
-
     flash("Actividad no encontrada.", "error")
     return redirect(url_for("actividad_maquinaria"))
 
@@ -601,30 +561,15 @@ def guardar_checkout(id_actividad):
     if not usuario_logueado():
         flash("Debe iniciar sesión.", "error")
         return redirect(url_for("login"))
-
-    if not es_operario():
-        flash("Solo los Operarios pueden finalizar una actividad.", "error")
-        return redirect(url_for("dashboard"))
-
     try:
         accion = request.form.get("accion")
-
         if accion == "averia":
-            estado = "AVERIADO"
-            falla = request.form.get("observacion_falla", "")
-            finalizar_actividad(id_actividad, None, None, None, estado, falla)
+            finalizar_actividad(id_actividad, None, None, None, "AVERIADO", request.form.get("observacion_falla", ""))
             flash("Alerta de avería registrada. Logística notificada.", "error")
         else:
-            estado = "FINALIZADO"
-            c_final = request.form["combustible_final"]
-            h_reales = request.form["horas_reales"]
-            motivo = request.form.get("motivo_retraso", "")
-
-            finalizar_actividad(id_actividad, c_final, h_reales, motivo, estado, None)
+            finalizar_actividad(id_actividad, request.form["combustible_final"], request.form["horas_reales"], request.form.get("motivo_retraso", ""), "FINALIZADO", None)
             flash("Jornada finalizada y máquina liberada correctamente.", "success")
-
         return redirect(url_for("actividad_maquinaria"))
-
     except Exception as e:
         flash(f"Error inesperado: {repr(e)}", "error")
         return redirect(url_for("actividad_maquinaria"))
@@ -637,77 +582,36 @@ def guardar_checkout(id_actividad):
 @app.route("/api_listarpersonal", methods=["POST"])
 def api_listarpersonal():
     try:
-        resultado = listar_personal()
-        return jsonify(resultado)
-
+        return jsonify(listar_personal())
     except Exception as e:
-        return jsonify({
-            "code": -1,
-            "data": [],
-            "error": "Excepción superior: " + repr(e)
-        })
+        return jsonify({"code": -1, "data": [], "error": "Excepción superior: " + repr(e)})
 
 
 @app.route("/api_buscarpersonal/<string:dni>")
 def api_buscarpersonal(dni):
     try:
         resultado = leer_personal_xDNI(dni)
-
         if resultado:
-            return jsonify({
-                "code": 1,
-                "data": resultado,
-                "message": "Personal encontrado."
-            })
-
-        return jsonify({
-            "code": 0,
-            "data": {},
-            "message": f"No se encontró personal con DNI {dni}."
-        })
-
+            return jsonify({"code": 1, "data": resultado, "message": "Personal encontrado."})
+        return jsonify({"code": 0, "data": {}, "message": f"No se encontró personal con DNI {dni}."})
     except Exception as e:
-        return jsonify({
-            "code": -1,
-            "data": {},
-            "error": "Excepción superior: " + repr(e)
-        })
+        return jsonify({"code": -1, "data": {}, "error": "Excepción superior: " + repr(e)})
 
 
 @app.route("/api_guardarpersonal", methods=["POST"])
 def api_guardarpersonal():
     try:
         obj_personal = clsPersonal(
-            request.json["dni"],
-            request.json["nombres"],
-            request.json["apellidos"],
-            request.json.get("telefono", ""),
-            request.json.get("correo", ""),
-            request.json["tipo_usuario"],
-            request.json["area"],
-            request.json["fecha_ingreso"],
-            request.json["password"]
+            request.json["dni"], request.json["nombres"], request.json["apellidos"],
+            request.json.get("telefono", ""), request.json.get("correo", ""),
+            request.json["tipo_usuario"], request.json["area"],
+            request.json["fecha_ingreso"], request.json["password"]
         )
-
         if insertar_personal(obj_personal):
-            return jsonify({
-                "code": 1,
-                "data": {},
-                "message": "Personal insertado correctamente."
-            })
-
-        return jsonify({
-            "code": 0,
-            "data": {},
-            "error": "Error al insertar personal."
-        })
-
+            return jsonify({"code": 1, "data": {}, "message": "Personal insertado correctamente."})
+        return jsonify({"code": 0, "data": {}, "error": "Error al insertar personal."})
     except Exception as e:
-        return jsonify({
-            "code": -1,
-            "data": {},
-            "error": "Excepción superior: " + repr(e)
-        })
+        return jsonify({"code": -1, "data": {}, "error": "Excepción superior: " + repr(e)})
 
 
 # =========================================================
@@ -717,53 +621,23 @@ def api_guardarpersonal():
 @app.route("/api_gestion_solicitudes")
 def api_gestion_solicitudes():
     try:
-        resultado = listar_todas_solicitudes()
-
-        return jsonify({
-            "code": 1,
-            "data": resultado,
-            "message": "Solicitudes listadas correctamente"
-        })
-
+        return jsonify({"code": 1, "data": listar_todas_solicitudes(), "message": "Solicitudes listadas correctamente"})
     except Exception as e:
-        return jsonify({
-            "code": -1,
-            "data": [],
-            "error": "Excepción superior: " + repr(e)
-        })
+        return jsonify({"code": -1, "data": [], "error": "Excepción superior: " + repr(e)})
 
 
 @app.route("/api_guardarsolicitud", methods=["POST"])
 def api_guardarsolicitud():
     try:
         obj_solicitud = clsSolicitud(
-            request.json["trabajador"],
-            request.json["descripcion"],
-            request.json["area"],
-            request.json["prioridad"]
+            request.json["trabajador"], request.json["descripcion"],
+            request.json["area"], request.json["prioridad"]
         )
-
         if insertar_solicitud(obj_solicitud):
-            return jsonify({
-                "code": 1,
-                "data": {},
-                "message": "Solicitud insertada correctamente"
-            })
-
-        return jsonify({
-            "code": 0,
-            "data": {},
-            "error": "Error al insertar solicitud"
-        })
-
+            return jsonify({"code": 1, "data": {}, "message": "Solicitud insertada correctamente"})
+        return jsonify({"code": 0, "data": {}, "error": "Error al insertar solicitud"})
     except Exception as e:
-        return jsonify({
-            "code": -1,
-            "data": {},
-            "error": "Excepción superior: " + repr(e)
-        })
-
-
+        return jsonify({"code": -1, "data": {}, "error": "Excepción superior: " + repr(e)})
 
 
 if __name__ == "__main__":
