@@ -1,4 +1,4 @@
 Flask
 PyMySQL
-reportlab==3.6.13
+reportlab>=4.0
 mysql-connector-python
