@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.utils import secure_filename
 from pdf_generator import generar_pdf_solicitud
 
-from maquinariaAD import clsMaquinaria, insertar_maquinaria, listar_maquinarias, actualizar_maquinaria, eliminar_maquinaria, obtener_maquinaria
+from maquinariaAD import clsMaquinaria, insertar_maquinaria, listar_maquinarias, actualizar_maquinaria, eliminar_maquinaria, obtener_maquinaria, leer_maquinaria_xId
 
 from solicitudAD import (
     clsSolicitud,
@@ -193,12 +193,20 @@ def registro_maquinaria():
     return render_template("maquinaria/registro_maquinaria.html")
 
 
-@app.route("/api_listarmaquinarias", methods=["POST"])
+@app.route("/api_listarmaquinarias", methods=["GET"])
 def api_listarmaquinarias():
+    rpta = dict()
     try:
-        return jsonify(listar_maquinarias())
+        resultado = listar_maquinarias()
+        rpta["code"] = 1
+        rpta["data"] = resultado
+        rpta["message"] = "Listado de maquinarias correcto"
+        return jsonify(rpta)
     except Exception as e:
-        return jsonify({"error": repr(e)})
+        rpta["code"] = -1
+        rpta["data"] = []
+        rpta["message"] = "Error: " + repr(e)
+        return jsonify(rpta)
 
 
 @app.route("/guardar_maquinaria", methods=["POST"])
@@ -282,6 +290,30 @@ def eliminar_maquinaria_web():
     except Exception as e:
         flash(f"Error: {repr(e)}", "error")
     return redirect(url_for("mis_maquinarias"))
+
+@app.route("/api_leermaquinariaxid", methods=['POST'])
+def api_leerentidadxid():
+    rpta = dict()
+    try:
+        # Se captura el id que viaja en el JSON del cuerpo del request
+        id_entidad = request.json['id_maquinaria']
+        resultado = leer_maquinaria_xId(id_entidad)
+        
+        if resultado:
+            rpta["code"] = 1
+            rpta["data"] = resultado
+            rpta["message"] = "Maquinaria encontrada con éxito"
+        else:
+            rpta["code"] = 0
+            rpta["data"] = []
+            rpta["message"] = "No se encontró maquinaria con el ID proporcionado"
+        return jsonify(rpta)
+    except Exception as e:
+        rpta["code"] = -1
+        rpta["data"] = []
+        rpta["message"] = "Error: " + repr(e)
+        return jsonify(rpta)
+    
 
 
 # =========================================================
