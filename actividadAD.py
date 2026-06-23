@@ -75,3 +75,19 @@ def finalizar_actividad(id_actividad, combustible_final, horas_reales, motivo_re
     except Exception as e:
         print("Error al finalizar actividad:", repr(e))
         return False
+
+# --- NUEVA FUNCIÓN ---
+
+def eliminar_actividad(id_actividad):
+    try:
+        conn = obtener_conexion()
+        if conn is None: return False
+        with conn:
+            with conn.cursor() as cursor:
+                sql = "DELETE FROM actividad_maquinaria WHERE id_actividad = %s"
+                cursor.execute(sql, (id_actividad,))
+            conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error al eliminar actividad: {repr(e)}")
+        return False
