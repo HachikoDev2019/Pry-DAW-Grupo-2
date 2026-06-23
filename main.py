@@ -450,6 +450,42 @@ def eliminar_solicitud_web():
 
 
 # =========================================================
+# Generar PDF para solicitudes aprobadas sin PDF
+# =========================================================
+
+@app.route("/generar_pdf/<int:id_solicitud>", methods=["POST"])
+def generar_pdf_existente(id_solicitud):
+    if not usuario_logueado():
+        flash("Debe iniciar sesión.", "error")
+        return redirect(url_for("login"))
+    if not es_supervisor_o_admin():
+        flash("No tienes permisos para generar PDFs.", "error")
+        return redirect(url_for("dashboard"))
+
+    try:
+        solicitudes = listar_todas_solicitudes()
+        solicitud = next((s for s in solicitudes if s["id_solicitud"] == id_solicitud), None)
+
+        if not solicitud or solicitud["estado"] != "Aprobado":
+            flash("La solicitud no existe o no está aprobada.", "error")
+            return redirect(url_for("gestion_solicitudes"))
+
+        ruta_pdf = generar_pdf_solicitud(
+            id_solicitud,
+            solicitud["trabajador"],
+            solicitud["descripcion"],
+            solicitud["area"],
+            solicitud["prioridad"]
+        )
+        actualizar_ruta_pdf(id_solicitud, ruta_pdf)
+        flash("PDF generado correctamente. Ya puedes descargarlo.", "success")
+    except Exception as e:
+        flash(f"Error al generar el PDF: {repr(e)}", "error")
+
+    return redirect(url_for("gestion_solicitudes"))
+
+
+# =========================================================
 # NUEVO: Subir PDF firmado con Certezia (supervisor)
 # =========================================================
 

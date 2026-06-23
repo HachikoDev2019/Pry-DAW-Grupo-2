@@ -17,7 +17,7 @@ def generar_pdf_solicitud(
 
     nombre_archivo = f"solicitud_{id_solicitud}.pdf"
 
-    ruta_pdf = os.path.join(carpeta, nombre_archivo)
+    ruta_pdf = f"{carpeta}/{nombre_archivo}"
 
     pdf = canvas.Canvas(ruta_pdf, pagesize=letter)
 
