@@ -4,3 +4,5 @@ mysql-connector-python
 anthropic
 python-dotenv
 requests
+reportlab>=4.0
+mysql-connector-python
