@@ -495,7 +495,7 @@ def obtener_id_solicitado(campo_id):
 def api_guardarmaquinaria():
     try:
         data = request.json
-        obj = clsMaquinaria(0, data["nombre_codigo"], data["tipo"], data["marca"], data["modelo"], data["area"], data["estado"], data["observaciones"])
+        obj = clsMaquinaria(data["nombre_codigo"], data["tipo"], data["marca"], data["modelo"], data["area"], data["estado"], data["observaciones"])
         if insertar_maquinaria(obj):
             return jsonify({"code": 1, "data": {}, "message": "Maquinaria insertada correctamente"})
         return jsonify({"code": 0, "data": {}, "message": "Error al insertar maquinaria"})
