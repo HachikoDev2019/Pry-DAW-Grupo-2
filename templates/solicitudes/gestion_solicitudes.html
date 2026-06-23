@@ -104,9 +104,13 @@
 
                                     {# Descargar PDF #}
                                     {% if solicitud.estado == 'Aprobado' and solicitud.ruta_pdf %}
-                                        <a href="/{{ solicitud.ruta_pdf }}" download>
+                                        <a href="/{{ solicitud.ruta_pdf | replace('\\', '/') }}" download>
                                         Descargar PDF
                                         </a>
+                                    {% elif solicitud.estado == 'Aprobado' %}
+                                        <form method="POST" action="{{ url_for('generar_pdf_existente', id_solicitud=solicitud.id_solicitud) }}" style="display:inline">
+                                            <button type="submit">Generar PDF</button>
+                                        </form>
                                     {% else %}
                                         <span class="menu-disabled">Descargar PDF (no disponible)</span>
                                     {% endif %}

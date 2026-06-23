@@ -3,6 +3,7 @@ from bd import obtener_conexion
 
 class clsMaquinaria:
     def __init__(self, nombre_codigo, tipo, marca, modelo, area, estado, observaciones):
+        
         self.nombre_codigo = nombre_codigo
         self.tipo = tipo
         self.marca = marca
@@ -67,6 +68,20 @@ def listar_maquinarias():
         print("Error al listar maquinarias:", repr(e))
         return []
 
+
+def leer_maquinaria_xId(p_idMaquinaria):
+    try:
+        conn = obtener_conexion()
+        result = None
+        if conn:
+            with conn:
+                with conn.cursor() as cursor:
+                    sql = "SELECT id_maquinaria, nombre_codigo, tipo, marca, modelo, area, estado, observaciones, fecha_registro FROM maquinaria WHERE id_maquinaria = %s"
+                    cursor.execute(sql, (p_idMaquinaria,))
+                    result = cursor.fetchall()  # O cursor.fetchone() según cómo manejes tu diccionario
+        return result
+    except Exception as e:
+        raise
 
 
 

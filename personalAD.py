@@ -1,7 +1,6 @@
 from bd import obtener_conexion
 import pymysql.cursors
- 
- 
+
 class clsPersonal:
     def __init__(self, dni, nombres, apellidos, telefono, correo,
                  tipo_usuario, area, fecha_ingreso, password):
@@ -14,16 +13,15 @@ class clsPersonal:
         self.area          = area
         self.fecha_ingreso = fecha_ingreso
         self.password      = password
- 
- 
+
 def insertar_personal(personal):
     try:
         conn = obtener_conexion()
- 
+
         if conn is None:
             print("No se pudo conectar a la BD.")
             return False
- 
+
         with conn:
             with conn.cursor() as cursor:
                 sql = """
@@ -44,25 +42,24 @@ def insertar_personal(personal):
                     personal.password
                 ))
             conn.commit()
- 
+
         return True
- 
+
     except Exception as e:
         print("Error al insertar personal:", repr(e))
         return False
- 
- 
+
 def verificar_credenciales(dni, password):
     try:
         conexion = obtener_conexion()
- 
+
         if conexion is None:
             print("No se pudo conectar con MySQL en verificar_credenciales.")
             return None
- 
+
         dni_buscar      = str(dni).strip()
         password_buscar = str(password).strip()
- 
+
         with conexion:
             with conexion.cursor(pymysql.cursors.DictCursor) as cursor:
                 query = """
@@ -72,14 +69,14 @@ def verificar_credenciales(dni, password):
                 """
                 cursor.execute(query, (dni_buscar,))
                 trabajador = cursor.fetchone()
- 
+
                 if trabajador:
                     db_password = str(trabajador['password']).strip()
                     db_estado   = str(trabajador['estado']).strip()
- 
+
                     print(f"[DEBUG] DNI encontrado. Estado: {db_estado}")
                     print(f"[DEBUG] Pass BD: '{db_password}' | Pass ingresada: '{password_buscar}'")
- 
+
                     if db_password == password_buscar:
                         if db_estado == 'Activo':
                             return {
@@ -97,11 +94,10 @@ def verificar_credenciales(dni, password):
                 else:
                     print(f"[LOGIN] No se encontró DNI: {dni_buscar}")
                     return None
- 
+
     except Exception as err:
         print(f"Error crítico en verificar_credenciales: {err}")
         return None
-
 
 def listar_personal():
     try:
@@ -185,3 +181,43 @@ def leer_personal_xDNI(dni):
     except Exception as e:
         print("Error en leer_personal_xDNI:", repr(e))
         return None
+
+# --- NUEVAS FUNCIONES ---
+
+def actualizar_personal(id_personal, data):
+    try:
+        conexion = obtener_conexion()
+        if conexion is None: return False
+        with conexion:
+            with conexion.cursor() as cursor:
+                sql = """UPDATE personal 
+                         SET nombres=%s, apellidos=%s, telefono=%s, correo=%s, tipo_usuario=%s, area=%s 
+                         WHERE id_personal=%s"""
+                cursor.execute(sql, (
+                    data.get("nombres"), 
+                    data.get("apellidos"), 
+                    data.get("telefono"), 
+                    data.get("correo"), 
+                    data.get("tipo_usuario"), 
+                    data.get("area"), 
+                    id_personal
+                ))
+            conexion.commit()
+        return True
+    except Exception as e:
+        print(f"Error al actualizar personal: {repr(e)}")
+        return False
+
+def eliminar_personal(id_personal):
+    try:
+        conexion = obtener_conexion()
+        if conexion is None: return False
+        with conexion:
+            with conexion.cursor() as cursor:
+                sql = "DELETE FROM personal WHERE id_personal = %s"
+                cursor.execute(sql, (id_personal,))
+            conexion.commit()
+        return True
+    except Exception as e:
+        print(f"Error al eliminar personal: {repr(e)}")
+        return False
