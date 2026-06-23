@@ -25,8 +25,7 @@ from solicitudAD import (
     eliminar_solicitud,
     actualizar_solicitud_operario,
     actualizar_ruta_pdf,
-    actualizar_ruta_pdf_firmado,
-    leer_solicitud_xId  # Asegúrate de tener esta función o se procesará internamente
+    actualizar_ruta_pdf_firmado
 )
 
 from personalAD import (
@@ -34,9 +33,7 @@ from personalAD import (
     insertar_personal,
     verificar_credenciales,
     listar_personal,
-    leer_personal_xDNI,
-    actualizar_personal,  # Añadido para consistencia de API
-    eliminar_personal     # Añadido para consistencia de API
+    leer_personal_xDNI
 )
 
 from actividadAD import (
@@ -44,8 +41,7 @@ from actividadAD import (
     iniciar_actividad,
     listar_actividades_activas,
     obtener_actividad,
-    finalizar_actividad,
-    eliminar_actividad    # Añadido para consistencia de API
+    finalizar_actividad
 )
 
 app = Flask(__name__)
@@ -563,12 +559,11 @@ def api_guardarpersonal():
 def api_actualizarpersonal():
     try:
         data = request.json
-        # Se asume estructura estándar de parámetros en personalAD
         if actualizar_personal(data["id_personal"], data):
             return jsonify({"code": 1, "data": {}, "message": "Personal actualizado correctamente"})
         return jsonify({"code": 0, "data": {}, "message": "No se pudo actualizar el personal"})
     except Exception as e:
-        return jsonify({"code": -1, "data": [], "message": repr(e)})
+        return jsonify({"code": -1, "data": [], "message": "Falta implementar 'actualizar_personal' en personalAD.py"})
 
 @app.route("/api_eliminarpersonal", methods=["POST"])
 def api_eliminarpersonal():
@@ -578,7 +573,7 @@ def api_eliminarpersonal():
             return jsonify({"code": 1, "data": {}, "message": "Personal eliminado correctamente"})
         return jsonify({"code": 0, "data": {}, "message": "No se pudo eliminar el personal"})
     except Exception as e:
-        return jsonify({"code": -1, "data": [], "message": repr(e)})
+        return jsonify({"code": -1, "data": [], "message": "Falta implementar 'eliminar_personal' en personalAD.py"})
 
 @app.route("/api_leerpersonalxid", methods=["GET", "POST"])
 def api_leerpersonalxid():
@@ -637,12 +632,9 @@ def api_eliminarsolicitud():
 def api_leersolicitudxid():
     try:
         id_entidad = obtener_id_solicitado("id_solicitud")
-        # Fallback dinámico integrado por si no tienes importada la función directa leer_solicitud_xId
-        try:
-            resultado = leer_solicitud_xId(id_entidad)
-        except NameError:
-            solicitudes = listar_todas_solicitudes()
-            resultado = next((s for s in solicitudes if str(s["id_solicitud"]) == str(id_entidad)), None)
+        # Fallback seguro: Trae todas y filtra la que buscas si no tienes leer_solicitud_xId
+        solicitudes = listar_todas_solicitudes()
+        resultado = next((s for s in solicitudes if str(s["id_solicitud"]) == str(id_entidad)), None)
         
         if resultado:
             return jsonify({"code": 1, "data": resultado, "message": "Solicitud encontrada"})
@@ -677,7 +669,6 @@ def api_guardaractividad():
 def api_actualizaractividad():
     try:
         data = request.json
-        # Mapeo directo a finalizar_actividad que actúa como el actualizador del estado del flujo corporativo
         finalizar_actividad(data["id_actividad"], data.get("combustible_final"), data.get("horas_reales"), data.get("motivo_retraso"), data.get("estado", "FINALIZADO"), data.get("observacion_falla"))
         return jsonify({"code": 1, "data": {}, "message": "Actividad actualizada correctamente"})
     except Exception as e:
@@ -691,7 +682,7 @@ def api_eliminaractividad():
             return jsonify({"code": 1, "data": {}, "message": "Actividad eliminada correctamente"})
         return jsonify({"code": 0, "data": {}, "message": "No se pudo eliminar la actividad"})
     except Exception as e:
-        return jsonify({"code": -1, "data": [], "message": repr(e)})
+        return jsonify({"code": -1, "data": [], "message": "Falta implementar 'eliminar_actividad' en actividadAD.py"})
 
 @app.route("/api_leeractividadxid", methods=["GET", "POST"])
 def api_leeractividadxid():
