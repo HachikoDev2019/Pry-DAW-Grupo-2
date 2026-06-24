@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Rostro{% endblock %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<div class="face-reg-card">
+    <h1>Registro de Rostro</h1>
+    <p class="subtitle">
+        Registra tu identificación facial para poder iniciar sesión sin contraseña.
+        Asegúrate de tener buena iluminación y mirar directo a la cámara.
+    </p>
+
+    <div class="face-reg-scanner" id="scannerBox">
+        <video id="videoRegistro" autoplay muted playsinline></video>
+        <canvas id="canvasRegistro"></canvas>
+        <div class="face-scan-line"></div>
+        <div class="face-corner tl"></div>
+        <div class="face-corner tr"></div>
+        <div class="face-corner bl"></div>
+        <div class="face-corner br"></div>
+    </div>
+
+    <p id="registroStatus" class="face-reg-status">Presiona "Activar cámara" para comenzar.</p>
+
+    <div class="face-reg-actions">
+        <button class="btn-primary" id="btnActivar" onclick="inicializarCamara()">Activar cámara</button>
+        <button class="btn-capture" id="btnCapturar" onclick="capturarRostro()" disabled style="display:none;">
+            Capturar y Guardar Rostro
+        </button>
+        <button class="btn-stop-cam" id="btnDetener" onclick="detenerCamara()" style="display:none;">
+            Detener cámara
+        </button>
+        <a href="{{ url_for('dashboard') }}" class="btn-stop-cam" id="btnVolver" style="display:none; text-decoration:none;">
+            Volver al Dashboard
+        </a>
+    </div>
+
+    <div style="margin-top: 28px; background: #eef3fb; border-radius: 10px; padding: 16px; text-align: left;">
+        <p style="font-size: 12.5px; font-weight: 800; color: #3d5a82; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Consejos para un mejor registro</p>
+        <ul style="font-size: 13px; color: #5b7fb1; padding-left: 18px; line-height: 1.8;">
+            <li>Asegura buena iluminación frontal (no contraluces)</li>
+            <li>Mira directo a la cámara sin inclinarte</li>
+            <li>Retira lentes de sol o mascarillas si los usas</li>
+            <li>Mantente quieto cuando aparezca el recuadro verde</li>
+        </ul>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/face_registro.js') }}"></script>
+
+{% endblock %}

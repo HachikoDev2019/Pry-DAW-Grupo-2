@@ -53,9 +53,9 @@
                 </li>
 
                 <li>
-                    <a class="{% if request.path.startswith('/actividad') %}active{% endif %}"
-                        href="{{ url_for('actividad_maquinaria') }}">
-                        Actividad Maquinaria
+                    <a class="{% if request.path.startswith('/facturacion') %}active{% endif %}"
+                        href="{{ url_for('facturacion') }}">
+                        Facturación
                     </a>
                 </li>
 
@@ -113,6 +113,12 @@
                     </a>
                 </li>
                 {% endif %}
+                <li>
+                    <a class="{% if request.path == '/registrar_rostro' %}active{% endif %}"
+                        href="{{ url_for('registrar_rostro') }}">
+                        Mi Rostro
+                    </a>
+                </li>
             </ul>
         </aside>
         <main class="main-content">
@@ -130,6 +136,335 @@
             {% endblock %}
         </main>
     </div>
+
+    <!-- ========== CHATBOT FLOTANTE ========== -->
+    <style>
+        #cb-btn {
+            position: fixed !important;
+            bottom: 28px !important;
+            right: 28px !important;
+            width: 58px !important;
+            height: 58px !important;
+            border-radius: 50% !important;
+            background: #5b7fb1 !important;
+            color: #fff !important;
+            border: none !important;
+            cursor: pointer !important;
+            font-size: 26px !important;
+            box-shadow: 0 4px 18px rgba(91,127,177,0.5) !important;
+            z-index: 99999 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: transform .2s, background .2s !important;
+        }
+        #cb-btn:hover { background: #3d5a82 !important; transform: scale(1.08) !important; }
+
+        #cb-box {
+            position: fixed !important;
+            bottom: 98px !important;
+            right: 28px !important;
+            width: 340px !important;
+            max-height: 500px !important;
+            background: #fff !important;
+            border-radius: 16px !important;
+            box-shadow: 0 8px 40px rgba(30,42,58,0.18) !important;
+            display: none !important;
+            flex-direction: column !important;
+            z-index: 99998 !important;
+            overflow: hidden !important;
+            font-family: 'Segoe UI', sans-serif !important;
+        }
+        #cb-box.cb-open { display: flex !important; }
+
+        #cb-head {
+            background: #5b7fb1;
+            color: #fff;
+            padding: 13px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        #cb-head-info { display: flex; align-items: center; gap: 10px; }
+        #cb-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(255,255,255,.25);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 16px;
+        }
+        #cb-name { font-size: 14px; font-weight: 700; }
+        #cb-status { font-size: 11px; opacity: .8; }
+        #cb-close {
+            background: none; border: none; color: #fff;
+            font-size: 20px; cursor: pointer; opacity: .8; line-height: 1;
+        }
+        #cb-close:hover { opacity: 1; }
+
+        #cb-msgs {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            scroll-behavior: smooth;
+        }
+        .cb-msg-bot  { align-self: flex-start; max-width: 88%; }
+        .cb-msg-user { align-self: flex-end;   max-width: 88%; }
+        .cb-bubble {
+            padding: 9px 13px;
+            border-radius: 14px;
+            font-size: 13px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        .cb-msg-bot  .cb-bubble { background: #f0f4f9; color: #2d3436; border-bottom-left-radius: 4px; }
+        .cb-msg-user .cb-bubble { background: #5b7fb1; color: #fff;    border-bottom-right-radius: 4px; }
+
+        .cb-typing { display: flex; gap: 5px; padding: 10px 14px; }
+        .cb-typing span {
+            width: 7px; height: 7px; border-radius: 50%; background: #5b7fb1;
+            animation: cbBounce 1s infinite ease-in-out;
+        }
+        .cb-typing span:nth-child(2) { animation-delay: .15s; }
+        .cb-typing span:nth-child(3) { animation-delay: .30s; }
+        @keyframes cbBounce {
+            0%,80%,100% { transform: translateY(0); opacity:.5; }
+            40%          { transform: translateY(-7px); opacity:1; }
+        }
+
+        #cb-quick {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            padding: 6px 12px 2px; flex-shrink: 0;
+        }
+        .cb-chip {
+            background: #eef2f8; color: #3d5a82;
+            border: 1px solid #c8d6e8; border-radius: 20px;
+            padding: 5px 11px; font-size: 11px; font-weight: 600;
+            cursor: pointer; white-space: nowrap; font-family: inherit;
+            transition: background .15s;
+        }
+        .cb-chip:hover { background: #5b7fb1; color: #fff; border-color: #5b7fb1; }
+
+        #cb-footer {
+            display: flex; align-items: flex-end; gap: 8px;
+            padding: 10px 12px 12px;
+            border-top: 1px solid #eee; flex-shrink: 0; background: #fff;
+        }
+        #cb-input {
+            flex: 1; resize: none; border: 1px solid #d0dce8;
+            border-radius: 10px; padding: 9px 12px; font-size: 13px;
+            font-family: inherit; outline: none; max-height: 90px;
+            overflow-y: auto; transition: border-color .2s;
+        }
+        #cb-input:focus { border-color: #5b7fb1; }
+        #cb-send {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: #5b7fb1; color: #fff; border: none;
+            cursor: pointer; font-size: 16px; display: flex;
+            align-items: center; justify-content: center; flex-shrink: 0;
+            transition: background .2s;
+        }
+        #cb-send:hover:not(:disabled) { background: #3d5a82; }
+        #cb-send:disabled { background: #b0c4de; cursor: not-allowed; }
+    </style>
+
+    <button id="cb-btn" onclick="cbToggle()" title="Asistente Pomalca">💬</button>
+
+    <div id="cb-box">
+        <div id="cb-head">
+            <div id="cb-head-info">
+                <div id="cb-avatar">P</div>
+                <div>
+                    <div id="cb-name">Asistente Pomalca</div>
+                    <div id="cb-status">En línea · IA</div>
+                </div>
+            </div>
+            <button id="cb-close" onclick="cbToggle()">✕</button>
+        </div>
+
+        <div id="cb-msgs"></div>
+
+        <div id="cb-quick">
+            <button class="cb-chip" onclick="cbRapido('¿Cómo registro una solicitud?')">Solicitudes</button>
+            <button class="cb-chip" onclick="cbRapido('¿Cómo hago el check-in de maquinaria?')">Check-in</button>
+            <button class="cb-chip" onclick="cbRapido('¿Cuáles son los roles del sistema?')">Roles</button>
+            <button class="cb-chip" onclick="cbRapido('¿Cómo registro mi rostro?')">Reconocimiento facial</button>
+        </div>
+
+        <div id="cb-footer">
+            <textarea id="cb-input" placeholder="Escribe tu consulta..." rows="1"
+                onkeydown="cbTecla(event)" oninput="cbResize(this)"></textarea>
+            <button id="cb-send" onclick="cbEnviar()">➤</button>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        let abierto = false;
+        let ocupado = false;
+
+        /* ── BASE DE CONOCIMIENTO ── */
+        const REGLAS = [
+            {
+                claves: ['solicitud', 'solicitudes', 'registrar solicitud', 'crear solicitud', 'nueva solicitud', 'pedir'],
+                respuesta: '📋 <b>Cómo registrar una solicitud:</b><br>1. Ve a <b>Registrar Solicitud</b> en el menú lateral.<br>2. Completa el formulario: tipo de solicitud, maquinaria, descripción y fecha.<br>3. Haz clic en <b>Guardar</b>.<br>4. Puedes ver el estado en <b>Mis Solicitudes</b>.'
+            },
+            {
+                claves: ['mis solicitudes', 'ver solicitud', 'estado solicitud', 'solicitud pendiente', 'seguimiento'],
+                respuesta: '🔍 <b>Ver mis solicitudes:</b><br>Ve a <b>Mis Solicitudes</b> en el menú. Ahí verás todas tus solicitudes con su estado: <em>Pendiente</em>, <em>Aprobada</em> o <em>Rechazada</em>.'
+            },
+            {
+                claves: ['aprobar', 'rechazar', 'gestión de solicitudes', 'gestionar', 'aprobar solicitud'],
+                respuesta: '✅ <b>Gestión de Solicitudes</b> (solo Administrador y Supervisor):<br>Ve a <b>Gestión de Solicitudes</b> en el menú para aprobar o rechazar solicitudes de los operarios.'
+            },
+            {
+                claves: ['check-in', 'checkin', 'check in', 'entrada maquinaria', 'registrar entrada', 'inicio uso'],
+                respuesta: '🔧 <b>Check-in de maquinaria:</b><br>1. Ve a <b>Actividad Maquinaria</b>.<br>2. Selecciona la máquina y haz clic en <b>Check-in</b>.<br>3. Registra la hora de inicio y el operario responsable.'
+            },
+            {
+                claves: ['check-out', 'checkout', 'check out', 'salida maquinaria', 'fin uso', 'devolver'],
+                respuesta: '🏁 <b>Check-out de maquinaria:</b><br>1. Ve a <b>Actividad Maquinaria</b>.<br>2. Busca el registro activo de la máquina.<br>3. Haz clic en <b>Check-out</b> para registrar la finalización.'
+            },
+            {
+                claves: ['actividad', 'actividad maquinaria', 'historial maquinaria', 'uso maquinaria'],
+                respuesta: '📊 <b>Actividad Maquinaria:</b><br>En esta sección puedes ver el historial de uso de cada máquina, quién la usó, cuándo y por cuánto tiempo. Disponible para todos los roles.'
+            },
+            {
+                claves: ['maquinaria', 'máquina', 'registrar maquinaria', 'nueva maquina', 'equipo'],
+                respuesta: '⚙️ <b>Gestión de Maquinaria</b> (Administrador/Supervisor):<br>1. Ve a <b>Maquinaria</b> en el menú.<br>2. Puedes registrar nuevas máquinas, ver el inventario y actualizar el estado de cada equipo.'
+            },
+            {
+                claves: ['rol', 'roles', 'tipo usuario', 'permisos', 'administrador', 'supervisor', 'operario'],
+                respuesta: '👥 <b>Roles del sistema:</b><br>• <b>Administrador:</b> acceso total — gestiona usuarios, maquinaria, solicitudes y reportes.<br>• <b>Supervisor:</b> aprueba solicitudes, gestiona maquinaria y actividades.<br>• <b>Operario:</b> registra solicitudes y consulta actividades.'
+            },
+            {
+                claves: ['rostro', 'facial', 'reconocimiento', 'cara', 'registrar rostro', 'mi rostro', 'face'],
+                respuesta: '🤳 <b>Reconocimiento facial:</b><br>1. Ve a <b>Mi Rostro</b> en el menú lateral.<br>2. Permite el acceso a la cámara.<br>3. Haz clic en <b>Capturar y Guardar Rostro</b>.<br>4. Una vez registrado, puedes iniciar sesión con tu rostro en la pantalla de login.'
+            },
+            {
+                claves: ['login', 'iniciar sesion', 'ingresar', 'acceso', 'contraseña', 'usuario'],
+                respuesta: '🔐 <b>Inicio de sesión:</b><br>Puedes acceder al sistema de dos formas:<br>• Con tu <b>usuario y contraseña</b>.<br>• Con <b>reconocimiento facial</b> (si ya registraste tu rostro en <em>Mi Rostro</em>).'
+            },
+            {
+                claves: ['cerrar sesion', 'logout', 'salir', 'cerrar'],
+                respuesta: '🚪 Para <b>cerrar sesión</b>, haz clic en el botón <b>Cerrar sesión</b> en la parte superior derecha del sistema.'
+            },
+            {
+                claves: ['dashboard', 'inicio', 'panel', 'pantalla principal'],
+                respuesta: '🏠 El <b>Dashboard</b> es tu pantalla principal. Muestra un resumen del sistema: solicitudes recientes, actividad de maquinaria y accesos rápidos según tu rol.'
+            },
+            {
+                claves: ['reporte', 'reportes', 'informe', 'estadística', 'exportar'],
+                respuesta: '📈 La sección de <b>Reportes</b> está en desarrollo. Pronto podrás exportar informes de solicitudes y actividad de maquinaria en PDF o Excel.'
+            },
+            {
+                claves: ['ayuda', 'ayudame', 'no entiendo', 'como funciona', 'qué puedo hacer', 'que hago'],
+                respuesta: '🤖 Puedo ayudarte con:<br>• Registrar y ver solicitudes<br>• Check-in/Check-out de maquinaria<br>• Gestión de actividades<br>• Reconocimiento facial<br>• Roles y permisos<br><br>Escribe tu pregunta o elige una opción rápida abajo.'
+            },
+            {
+                claves: ['hola', 'buenas', 'buenos días', 'buen día', 'buenas tardes', 'buenas noches', 'saludos', 'hey'],
+                respuesta: '👋 ¡Hola! Soy el asistente de Pomalca. ¿En qué puedo ayudarte hoy?'
+            },
+            {
+                claves: ['gracias', 'thank', 'perfecto', 'excelente', 'genial', 'listo'],
+                respuesta: '😊 ¡De nada! Si tienes otra consulta, aquí estoy para ayudarte.'
+            }
+        ];
+
+        function obtenerRespuesta(msg) {
+            const m = msg.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+            for (const r of REGLAS) {
+                if (r.claves.some(c => m.includes(c.normalize('NFD').replace(/[̀-ͯ]/g, '')))) {
+                    return r.respuesta;
+                }
+            }
+            return '🤔 No estoy seguro de cómo ayudarte con eso. Puedes preguntarme sobre:<br>• <b>Solicitudes</b> (registrar, ver, aprobar)<br>• <b>Maquinaria</b> (check-in, check-out, inventario)<br>• <b>Roles</b> del sistema<br>• <b>Reconocimiento facial</b>';
+        }
+
+        /* ── INTERFAZ ── */
+
+        window.cbToggle = function() {
+            abierto = !abierto;
+            const box = document.getElementById('cb-box');
+            const btn = document.getElementById('cb-btn');
+            if (abierto) {
+                box.classList.add('cb-open');
+                btn.style.background = '#3d5a82';
+                if (!document.getElementById('cb-msgs').children.length) {
+                    cbBot('👋 ¡Hola! Soy el asistente de <b>Pomalca</b>. Puedo orientarte sobre solicitudes, maquinaria, actividades, roles y más. ¿En qué te ayudo?');
+                }
+                setTimeout(() => document.getElementById('cb-input').focus(), 150);
+            } else {
+                box.classList.remove('cb-open');
+                btn.style.background = '';
+            }
+        };
+
+        window.cbEnviar = function() {
+            const inp = document.getElementById('cb-input');
+            const txt = inp.value.trim();
+            if (!txt || ocupado) return;
+
+            inp.value = ''; inp.style.height = 'auto';
+            ocupado = true;
+            cbUsuario(txt);
+            cbTyping(true);
+
+            setTimeout(function() {
+                cbTyping(false);
+                cbBot(obtenerRespuesta(txt));
+                ocupado = false;
+                document.getElementById('cb-input').focus();
+            }, 600);
+        };
+
+        window.cbRapido = function(txt) {
+            document.getElementById('cb-input').value = txt;
+            cbEnviar();
+        };
+
+        window.cbTecla = function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); cbEnviar(); }
+        };
+
+        window.cbResize = function(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+        };
+
+        function cbBot(html) {
+            const c = document.getElementById('cb-msgs');
+            const d = document.createElement('div');
+            d.className = 'cb-msg-bot';
+            d.innerHTML = '<div class="cb-bubble">' + html + '</div>';
+            c.appendChild(d);
+            c.scrollTop = c.scrollHeight;
+        }
+
+        function cbUsuario(txt) {
+            const c = document.getElementById('cb-msgs');
+            const d = document.createElement('div');
+            d.className = 'cb-msg-user';
+            d.innerHTML = '<div class="cb-bubble">' + txt.replace(/</g,'&lt;') + '</div>';
+            c.appendChild(d);
+            c.scrollTop = c.scrollHeight;
+        }
+
+        function cbTyping(show) {
+            const c = document.getElementById('cb-msgs');
+            const ex = document.getElementById('cb-typing-el');
+            if (show) {
+                if (ex) return;
+                const d = document.createElement('div');
+                d.id = 'cb-typing-el'; d.className = 'cb-msg-bot';
+                d.innerHTML = '<div class="cb-bubble cb-typing"><span></span><span></span><span></span></div>';
+                c.appendChild(d); c.scrollTop = c.scrollHeight;
+            } else { if (ex) ex.remove(); }
+        }
+    })();
+    </script>
 
     <!-- Modal de Confirmación Genérico -->
     <div id="confirmModal">

@@ -122,6 +122,44 @@ def listar_personal():
         print("Error en listar_personal:", repr(e))
         return []
 
+
+def guardar_face_descriptor(id_personal, descriptor_json):
+    conn = obtener_conexion()
+    if conn is None:
+        raise RuntimeError("No se pudo conectar a la base de datos.")
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE personal SET face_descriptor = %s WHERE id_personal = %s",
+                (descriptor_json, id_personal)
+            )
+        conn.commit()
+        return True
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
+def obtener_todos_descriptores_activos():
+    try:
+        conn = obtener_conexion()
+        if conn is None:
+            return []
+        with conn:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT id_personal, nombres, apellidos, tipo_usuario, face_descriptor
+                    FROM personal
+                    WHERE estado = 'Activo' AND face_descriptor IS NOT NULL
+                """)
+                return cursor.fetchall()
+    except Exception as e:
+        print("Error en obtener_todos_descriptores_activos:", repr(e))
+        return []
+
+
 def leer_personal_xDNI(dni):
     try:
         conn = obtener_conexion()

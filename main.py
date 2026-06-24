@@ -1,4 +1,10 @@
+import json
+import math
 import os
+from datetime import datetime
+import requests
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.utils import secure_filename
 from pdf_generator import generar_pdf_solicitud
@@ -34,6 +40,8 @@ from personalAD import (
     verificar_credenciales,
     listar_personal,
     leer_personal_xDNI,
+    guardar_face_descriptor,
+    obtener_todos_descriptores_activos,
     actualizar_personal, # NUEVO
     eliminar_personal    # NUEVO
 )
@@ -154,6 +162,18 @@ def guardar_personal():
     try:
         personal = clsPersonal(dni, nombres, apellidos, telefono, correo, tipo_usuario, area, fecha_ingreso, password)
         if insertar_personal(personal):
+            # Si el usuario capturó su rostro durante el registro, guardarlo
+            face_raw = request.form.get("face_descriptor", "").strip()
+            if face_raw:
+                try:
+                    descriptor = json.loads(face_raw)
+                    if len(descriptor) == 128:
+                        usuario_nuevo = leer_personal_xDNI(dni)
+                        if usuario_nuevo:
+                            guardar_face_descriptor(usuario_nuevo["id_personal"], face_raw)
+                except Exception:
+                    pass  # El rostro falla silenciosamente; la cuenta igual se crea
+
             flash("Cuenta creada correctamente. Ya puedes iniciar sesión.", "success")
             return redirect(url_for("login"))
         flash("Error al crear la cuenta. Verifica que el DNI o correo no estén registrados.", "error")
@@ -703,6 +723,294 @@ def api_leeractividades():
         return jsonify({"code": 1, "data": listar_actividades_activas(), "message": "Listado de actividades activas obtenido"})
     except Exception as e:
         return jsonify({"code": -1, "data": [], "message": repr(e)})
+
+
+
+
+# =========================================================
+# RECONOCIMIENTO FACIAL
+# =========================================================
+
+def _distancia_euclidiana(a, b):
+    return math.sqrt(sum((x - y) ** 2 for x, y in zip(a, b)))
+
+
+@app.route("/registrar_rostro")
+def registrar_rostro():
+    if not usuario_logueado():
+        flash("Debe iniciar sesión.", "error")
+        return redirect(url_for("login"))
+    return render_template("registro_rostro.html")
+
+
+@app.route("/api/guardar_rostro", methods=["POST"])
+def api_guardar_rostro():
+    if not usuario_logueado():
+        return jsonify({"code": 0, "message": "No autenticado."})
+    try:
+        descriptor = request.json.get("descriptor", [])
+        if len(descriptor) != 128:
+            return jsonify({"code": 0, "message": f"Descriptor inválido: {len(descriptor)} valores (se esperan 128)."})
+        descriptor_json = json.dumps(descriptor)
+        guardar_face_descriptor(session["id_personal"], descriptor_json)
+        return jsonify({"code": 1, "message": "Rostro registrado correctamente."})
+    except Exception as e:
+        print("ERROR /api/guardar_rostro:", repr(e))
+        return jsonify({"code": 0, "message": str(e)})
+
+
+@app.route("/api/login_facial", methods=["POST"])
+def api_login_facial():
+    try:
+        descriptor_input = request.json.get("descriptor", [])
+        if len(descriptor_input) != 128:
+            return jsonify({"code": 0, "message": "Descriptor inválido."})
+
+        registros = obtener_todos_descriptores_activos()
+        UMBRAL = 0.60
+        mejor_match = None
+        mejor_dist = float("inf")
+
+        for reg in registros:
+            descriptor_bd = json.loads(reg["face_descriptor"])
+            dist = _distancia_euclidiana(descriptor_input, descriptor_bd)
+            if dist < mejor_dist:
+                mejor_dist = dist
+                mejor_match = reg
+
+        if mejor_match and mejor_dist < UMBRAL:
+            session["id_personal"] = mejor_match["id_personal"]
+            session["nombres"] = mejor_match["nombres"]
+            session["apellidos"] = mejor_match["apellidos"]
+            session["tipo_usuario"] = mejor_match["tipo_usuario"]
+            return jsonify({
+                "code": 1,
+                "message": f"¡Bienvenido, {mejor_match['nombres']}!",
+                "redirect": url_for("dashboard")
+            })
+
+        dist_info = f"{mejor_dist:.3f}" if mejor_match else "sin registros"
+        return jsonify({"code": 0, "message": f"Rostro no reconocido (dist: {dist_info}). Intenta de nuevo."})
+    except Exception as e:
+        return jsonify({"code": -1, "message": repr(e)})
+
+
+# =========================================================
+# CHATBOT INTELIGENTE — Anthropic Claude
+# =========================================================
+
+CHATBOT_SYSTEM = """Eres el asistente virtual inteligente del Sistema de Gestión de la Azucarera Pomalca.
+Tu rol es orientar a los usuarios sobre cómo usar la aplicación de forma clara, amable y concisa.
+
+=== MÓDULOS DEL SISTEMA ===
+
+1. SOLICITUDES
+   - Operarios pueden registrar solicitudes de materiales o repuestos desde "Registrar Solicitud".
+   - Campos: descripción, área, prioridad (Alta/Media/Baja).
+   - Estados: Pendiente → En revisión → Aprobado / Rechazado.
+   - Supervisores y Administradores gestionan y aprueban desde "Gestión de Solicitudes".
+   - Un Operario puede editar o eliminar sus solicitudes si aún están Pendientes.
+
+2. MAQUINARIA
+   - Solo Supervisores y Administradores pueden registrar y gestionar maquinaria.
+   - Estados de maquinaria: Operativo, En Mantenimiento, Inactivo.
+   - No se puede eliminar maquinaria con estado "Operativo".
+   - Se registra: nombre/código, tipo, marca, modelo, área, estado, observaciones.
+
+3. ACTIVIDAD DE MAQUINARIA
+   - Operarios realizan Check-In para iniciar una jornada con una máquina operativa.
+   - Se registra: máquina, zona, combustible inicial, horas estimadas.
+   - Al finalizar (Check-Out): combustible final, horas reales, motivo de retraso si aplica.
+   - Si hay avería durante la jornada, se reporta y la máquina queda como AVERIADA.
+
+4. RECONOCIMIENTO FACIAL
+   - Cualquier usuario puede registrar su rostro desde "Mi Rostro" en el menú lateral.
+   - Una vez registrado, puede iniciar sesión desde la pantalla de login sin contraseña.
+   - Se recomienda buena iluminación y mirar directo a la cámara al registrar.
+
+5. ROLES Y PERMISOS
+   - Operario: registra solicitudes y actividades de maquinaria.
+   - Supervisor: gestiona solicitudes, maquinaria y actividad.
+   - Administrador: acceso completo a todo el sistema.
+
+=== REGLAS DE RESPUESTA ===
+- Responde siempre en español.
+- Sé breve y directo (máximo 4 oraciones).
+- Si el usuario pregunta algo fuera del sistema, redirige amablemente al tema del sistema.
+- Usa listas cuando expliques varios pasos.
+- Si no sabes algo específico del sistema, sugiere contactar al Administrador.
+"""
+
+
+@app.route("/api/chatbot", methods=["POST"])
+def api_chatbot():
+    if not usuario_logueado():
+        return jsonify({"respuesta": "Debes iniciar sesión para usar el asistente."})
+    try:
+        import anthropic
+        data = request.json
+        historial = data.get("historial", [])
+        mensaje = data.get("mensaje", "").strip()
+
+        if not mensaje:
+            return jsonify({"respuesta": "Por favor escribe tu consulta."})
+
+        # Agregar el nombre y rol del usuario al contexto
+        nombre = session.get("nombres", "")
+        rol = session.get("tipo_usuario", "")
+        contexto_usuario = f"[Usuario actual: {nombre}, Rol: {rol}]"
+
+        mensajes_api = []
+        for h in historial[-10:]:  # últimos 10 turnos
+            mensajes_api.append({"role": h["role"], "content": h["content"]})
+        mensajes_api.append({"role": "user", "content": f"{contexto_usuario}\n{mensaje}"})
+
+        client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=500,
+            system=CHATBOT_SYSTEM,
+            messages=mensajes_api
+        )
+        return jsonify({"respuesta": response.content[0].text})
+
+    except Exception as e:
+        print("Error chatbot:", repr(e))
+        return jsonify({"respuesta": "No puedo responder en este momento. Intenta de nuevo en unos segundos."})
+
+
+
+
+## facturacion
+
+
+@app.route('/facturacion')
+def facturacion():
+    return render_template('facturacion/facturacion.html')
+
+SUNAT_API_URL = "https://facturaciondirecta.com/API_SUNAT/post.php"
+
+@app.route('/facturacion/emitir', methods=['POST'])
+def emitir_comprobante_sunat():
+    try:
+        # 1. Recibir los datos planos que vienen desde tu formulario HTML
+        data_frontend = request.get_json()
+        
+        # Extraemos las variables del HTML
+        tipo_doc = data_frontend.get('tipo_doc')  # "01" (Factura) o "03" (Boleta)
+        doc_cliente = data_frontend.get('doc')     # DNI o RUC
+        nombre_cliente = data_frontend.get('cliente')
+        producto_nombre = data_frontend.get('producto')
+        cantidad = float(data_frontend.get('cantidad', 0))
+        precio_unitario = float(data_frontend.get('precio', 0))
+        total = float(data_frontend.get('total', 0))
+        fecha_emision = data_frontend.get('fecha')
+
+        # --- CÁLCULOS TRIBUTARIOS ---
+        # En tu JSON de ejemplo, la "total_gravada" es el subtotal (Total / 1.18)
+        total_gravada = round(total / 1.18, 2)
+        total_igv = round(total - total_gravada, 2)
+        
+        # El "precio_base" en tu JSON de ejemplo equivale al precio unitario SIN IGV
+        precio_base = round(precio_unitario / 1.18, 2)
+
+        # Hora actual para el campo 'hora_emision'
+        hora_actual = datetime.now().strftime("%H:%M:%S")
+
+        # Determinar tipo de entidad del cliente (6 = RUC, 1 = DNI)
+        tipo_entidad = "6" if len(doc_cliente) == 11 else "1"
+
+        # --- CONSTRUCCIÓN DEL JSON IGUAL A TU EJEMPLO ---
+        payload_api = {
+            "empresa": {
+                "ruc": "20163898200",  # RUC de simulación de tu ejemplo
+                "razon_social": "EMPRESA AGROINDUSTRIAL POMALCA S.A.A",
+                "nombre_comercial": "POMALCA S.A.A",
+                "domicilio_fiscal": "Car. Chiclayo a Chogoyape Km. 07 (frente a la iglesia de Pomalca)", # Usa los datos de tu empresa real o de pruebas
+                "ubigeo": "140112",
+                "urbanizacion": "ZONA INDUSTRIAL",
+                "distrito": "POMALCA",
+                "provincia": "CHICLAYO",
+                "departamento": "LAMBAYEQUE",        
+                "modo": "0",  # 0 suele ser Beta/Homologación, 1 es Producción
+                "usu_secundario_produccion_user": "MODDATOS",
+                "usu_secundario_produccion_password": "MODDATOS",
+                "vendedor": "LAMBAYEQUE"   
+                 
+            },
+            "cliente": {
+                "razon_social_nombres": nombre_cliente,
+                "numero_documento": doc_cliente,
+                "codigo_tipo_entidad": tipo_entidad,
+                "cliente_direccion": "Dirección por defecto"
+            },
+            "venta": {
+                "serie": "FF03" if tipo_doc == "01" else "BB03", # Series de prueba según tipo
+                "numero": "53953",  # En un entorno real, esto vendrá correlativo de tu Base de Datos
+                "fecha_emision": fecha_emision,
+                "hora_emision": hora_actual,
+                "fecha_vencimiento": "",
+                "moneda_id": "1",  # 1 suele ser Soles (PEN) en la mayoría de sistemas locales
+                "forma_pago_id": "1", # 1 = Contado
+                "total_gravada": str(total_gravada),
+                "total_igv": str(total_igv),
+                "total_exonerada": "",
+                "total_inafecta": "",
+                "tipo_documento_codigo": tipo_doc,  # "01" o "03"
+                "nota": "Emisión desde Sistema Pomalca"
+            },
+            "items": [
+                {
+                    "producto": producto_nombre,
+                    "cantidad": str(int(cantidad)),
+                    "precio_base": str(precio_base),
+                    "codigo_sunat": "43211503",  # Código estándar genérico
+                    "codigo_producto": "POM-001",
+                    "codigo_unidad": "NIU",      # Unidades comerciales
+                    "tipo_igv_codigo": "10"      # 10 = Gravado - Operación Onerosa
+                }
+            ]
+        }
+
+        # 2. Enviar el JSON estructurado mediante POST a la API externa
+        headers = {"Content-Type": "application/json"}
+        respuesta_externa = requests.post(
+            SUNAT_API_URL, 
+            json=payload_api, 
+            headers=headers, 
+            timeout=15
+        )
+
+        # 3. Procesar respuesta de la API de Facturación
+        try:
+            resultado_json = respuesta_externa.json()
+        except Exception:
+            resultado_json = {"respuesta_texto": respuesta_externa.text}
+
+        if respuesta_externa.status_code == 200:
+            resultado_json = respuesta_externa.json()
+            print("REPORTE DE LA API:", resultado_json)
+            # Aquí puedes meter tu código PyMySQL para registrar la venta en tu Base de Datos local
+            return jsonify({
+                "status": "success",
+                "sunat_response": resultado_json
+            }), 200
+        else:
+            return jsonify({
+                "status": "error",
+                "error": f"La API SUNAT denegó la petición con código {respuesta_externa.status_code}",
+                "detalles": resultado_json
+            }), respuesta_externa.status_code
+
+    except requests.exceptions.Timeout:
+        return jsonify({"status": "error", "error": "Tiempo de espera agotado con la API de SUNAT."}), 504
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
+
+
+
+
+
 
 
 if __name__ == "__main__":

@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}Facturación - Azucarera Pomalca{% endblock %}
+
+{% block content %}
+
+<section class="form-card">
+    <h1>Emisión de Comprobante - Pomalca</h1>
+
+    <form id="facturacionForm" method="POST">
+
+        <div class="form-row">
+            <label>Empresa</label>
+            <input type="text" name="razon_social"
+                   value="EMPRESA AGROINDUSTRIAL POMALCA S.A.A" readonly>
+        </div>
+
+        <div class="form-row">
+            <label>Cliente</label>
+            <input type="text" name="cliente" required>
+        </div>
+
+        <div class="form-row">
+            <label>DNI / RUC Cliente</label>
+            <input type="text" name="doc" required>
+        </div>
+
+        <div class="form-row">
+            <label>Tipo de Documento</label>
+            <select name="tipo_doc" id="tipo_documento">
+                <option value="01">Factura</option>
+                <option value="03">Boleta</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Producto</label>
+            <select name="producto">
+                <option value="Azúcar Rubia 50kg">Azúcar Rubia 50kg</option>
+                <option value="Azúcar Blanca 50kg">Azúcar Blanca 50kg</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Cantidad</label>
+            <input type="number" name="cantidad" id="cantidad" required>
+        </div>
+
+        <div class="form-row">
+            <label>Precio Unitario</label>
+            <input type="number" name="precio" id="precio" step="0.01" required>
+        </div>
+
+        <div class="form-row">
+            <label>Total</label>
+            <input type="number" name="total" id="total" readonly>
+        </div>
+
+        <div class="form-row">
+            <label>Fecha de emisión</label>
+            <input type="text" name="fecha" id="fecha" readonly>
+        </div>
+
+        <button type="button" class="btn-submit" onclick="confirmarFactura()">
+            Emitir comprobante
+        </button>
+
+    </form>
+</section>
+
+<script>
+// =============================
+// FECHA AUTOMÁTICA
+// =============================
+document.addEventListener("DOMContentLoaded", function () {
+    const hoy = new Date();
+    const fechaFormateada = hoy.toISOString().split("T")[0];
+    document.getElementById("fecha").value = fechaFormateada;
+});
+
+// =============================
+// CALCULAR TOTAL AUTOMÁTICO
+// =============================
+const cantidadInput = document.getElementById("cantidad");
+const precioInput = document.getElementById("precio");
+const totalInput = document.getElementById("total");
+
+function calcularTotal() {
+    const cantidad = parseFloat(cantidadInput.value) || 0;
+    const precio = parseFloat(precioInput.value) || 0;
+    totalInput.value = (cantidad * precio).toFixed(2);
+}
+
+cantidadInput.addEventListener("input", calcularTotal);
+precioInput.addEventListener("input", calcularTotal);
+
+
+// =============================
+// FUNCIÓN VALIDAR DOCUMENTO
+// =============================
+function validarDocumento(tipo, doc) {
+    if (tipo === "01") { 
+        // Si es Factura (01), exige exactamente 11 dígitos
+        return doc.length === 11; 
+    }
+    if (tipo === "03") { 
+        // Si es Boleta (03), permite 8 (DNI) o 11 (RUC)
+        return doc.length === 8 || doc.length === 11; 
+    }
+    return false;
+}
+
+
+// =============================
+// CONFIRMACIÓN Y ENVÍO CON FETCH (FLASK -> SUNAT)
+// =============================
+function confirmarFactura() {
+    const form = document.getElementById("facturacionForm");
+
+    // 1. Validar requerimientos nativos del HTML (campos requeridos, etc.)
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const cliente = document.querySelector("[name='cliente']").value.trim();
+    const doc = document.querySelector("[name='doc']").value.trim();
+    const total = document.querySelector("[name='total']").value.trim();
+
+    // LEER EL SELECT USANDO EL ID CORRECTO: 'tipo_documento'
+    const selectElement = document.getElementById("tipo_documento");
+    const tipoDocValue = selectElement.value; 
+    const tipoDocTexto = selectElement.options[selectElement.selectedIndex].text;
+
+    // 2. Validar que la longitud de DNI/RUC sea correcta en Perú
+    const esValido = validarDocumento(tipoDocValue, doc);
+    
+    if (!esValido) {
+        let mensajeError = "";
+        if (tipoDocValue === "01") {
+            mensajeError = "Para emitir una Factura se requiere un número de RUC de 11 dígitos.";
+        } else {
+            mensajeError = "Para una Boleta el documento del cliente debe tener 8 dígitos (DNI) o 11 dígitos (RUC).";
+        }
+
+        openModal({
+            title: 'Error de Documento',
+            message: mensajeError,
+            onConfirm: () => closeModal()
+        });
+        return;
+    }
+
+    // 3. Abrir modal de confirmación antes de disparar la API
+    openModal({
+        title: 'Confirmar emisión - Pomalca',
+        message:
+            'Empresa: Azucarera Pomalca\n' +
+            'Tipo Comprobante: ' + tipoDocTexto + '\n' +
+            'Cliente: ' + cliente + '\n' +
+            'Documento: ' + doc + '\n' +
+            'Total: S/ ' + total + '\n\n' +
+            '¿Deseas emitir este comprobante a la SUNAT?',
+        onConfirm: async () => {
+            closeModal(); // Cerramos el primer modal de confirmación
+
+            // Bloqueamos el botón temporalmente para evitar doble clic
+            const btnSubmit = document.querySelector(".btn-submit");
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Emitiendo a SUNAT...";
+
+            // Mapeamos los datos del formulario a un objeto JSON plano
+            const formData = new FormData(form);
+            const datosJSON = Object.fromEntries(formData.entries());
+
+            try {
+                // Hacemos la llamada asíncrona a tu endpoint de Flask
+                const respuesta = await fetch('/facturacion/emitir', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datosJSON)
+                });
+
+                const resultado = await respuesta.json();
+
+                if (respuesta.ok && resultado.status === 'success') {
+                    const datosSunat = resultado.sunat_response.data; 
+                    const urlPdf = datosSunat.ruta_pdf; // Extraemos el link directo al PDF
+                    const descripcion = datosSunat.respuesta_sunat_description || 'El comprobante ha sido aceptado correctamente por SUNAT.';
+
+                    // ¡Éxito total! Mostramos el modal de confirmación exitosa
+                    openModal({
+                        title: '¡Emisión Exitosa!',
+                        message: `${descripcion}\n\n¿Deseas visualizar la representación impresa (PDF) de prueba?`,
+                        onConfirm: () => {
+                            closeModal();
+                            window.open(urlPdf, '_blank');
+                            form.reset(); // Reseteamos campos
+                            // Volvemos a colocar la fecha del día actual automáticamente
+                            const hoy = new Date();
+                            document.getElementById("fecha").value = hoy.toISOString().split("T")[0];
+                        }
+                    });
+                } else {
+                    // El backend o la SUNAT respondieron con un error controlado
+                    throw new Error(resultado.error || 'No se pudo validar el comprobante.');
+                }
+
+            } catch (err) {
+                // Errores de red o caídas de servidor externo
+                openModal({
+                    title: 'Error de Facturación',
+                    message: 'Hubo un problema al procesar la solicitud: ' + err.message,
+                    onConfirm: () => closeModal()
+                });
+            } finally {
+                // Desbloqueamos el botón al terminar la ejecución
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "Emitir comprobante";
+            }
+        }
+    });
+}
+</script>
+
+{% endblock %}
